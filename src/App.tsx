@@ -91,7 +91,7 @@ const App = () => {
       <GestureHandlerRootView style={{flex: 1}}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="ChatFlow"
+            initialRouteName="AuthFlow"
             screenOptions={{headerShown: false}}>
             <Stack.Screen name="AuthFlow" component={AuthFlow} />
             <Stack.Screen name="MainFlow" component={MainFlow} />

@@ -7,63 +7,107 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ChatHeader from '../components/ChatHeader';
 import database from '@react-native-firebase/database';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 
-const ChatScreen = ({navigation}) => {
-  const uid = useSelector(state => state.auth.uid);
+const ChatScreen = ({ navigation }) => {
+  const uid = useSelector((state) => state.auth.uid);
+  const email = useSelector((state) => state.auth.email);
+  const name = useSelector((state) => state.auth.name);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [isSent, setIsSent] = useState(true);
+  const flatListRef = useRef();
 
-  const sendText = () => {
-    if (message.trim()) {
-      const currentTime = new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      setMessages([
-        ...messages,
-        {text: message, sent: isSent, time: currentTime},
-      ]);
-      setMessage('');
-      setIsSent(!isSent);
-    }
-    database()
-      .ref(`/users/${uid}`)
-      .set(messages)
-      .then(() => console.log('Data set.'));
+  // Load messages from Firebase when component mounts
+  useEffect(() => {
+    const messagesRef = database().ref(`/users/${uid}/messages`);
+
+    const onValueChange = (snapshot) => {
+      const data = snapshot.val() || {};
+      const messagesArray = Object.values(data);
+
+      // Sort messages by timestamp (if available)
+      messagesArray.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+
+      setMessages(messagesArray);
+    };
+
+    messagesRef.on('value', onValueChange);
+
+    return () => messagesRef.off('value', onValueChange); // Clean up subscription on unmount
+  }, [uid]);
+
+  // Format the current time for displaying message time
+  const formatTime = () => {
+    return new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true, // Use 12-hour format
+    });
   };
 
+  // Handle sending of text messages
+  const sendText = useCallback(() => {
+    if (message.trim()) {
+      const newMessage = {
+        text: message,
+        sentBy: { email, username: name },
+        time: formatTime(),
+        timestamp: database.ServerValue.TIMESTAMP, // Store Firebase timestamp
+      };
+
+      // Save the message to Firebase and clear input field
+      database()
+        .ref(`/users/${uid}/messages`)
+        .push(newMessage)
+        .then(() => {
+          setMessage(''); // Clear input field
+        })
+        .catch((error) => {
+          console.error('Error sending message:', error);
+        });
+    }
+  }, [message, uid, email, name]);
+
+  // Render each message in the chat
+  const renderMessage = useCallback(
+    ({ item }) => {
+      const isSentByUser = item.sentBy.email === email;
+
+      return (
+        <View
+          style={[
+            styles.messageContainer,
+            isSentByUser ? styles.sentMessage : styles.receivedMessage,
+          ]}
+        >
+          <Text style={styles.ChatText}>{item.text}</Text>
+          <Text style={styles.messageTime}>{item.time}</Text>
+        </View>
+      );
+    },
+    [email]
+  );
+
+  // Scroll to the bottom when new messages arrive
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
   return (
-    <View style={styles.View}>
+    <View style={styles.container}>
       <ChatHeader navigation={navigation} />
-      {/* <Image
-        source={require('../assets/images/black_image.png')} // WhatsApp-like background
-        style={styles.backgroundImage}
-      /> */}
       <View style={styles.ChatView}>
         <FlatList
+          ref={flatListRef}
           data={messages}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({item}) => (
-            <View
-              style={[
-                styles.messageContainer,
-                item.sent ? styles.sentMessage : styles.receivedMessage,
-              ]}>
-              <Text
-                style={[
-                  styles.ChatText,
-                  item.sent ? styles.ChatSenderText : styles.ChatReceiverText,
-                ]}>
-                {item.text}
-              </Text>
-              <Text style={styles.messageTime}>{item.time}</Text>
-            </View>
-          )}
+          renderItem={renderMessage}
+          style={{ paddingBottom: 20 }} // Additional padding at the bottom
         />
       </View>
       <View style={styles.TextInputView}>
@@ -71,12 +115,18 @@ const ChatScreen = ({navigation}) => {
           style={styles.TextInput}
           value={message}
           onChangeText={setMessage}
-          placeholder="Type a message..."
+          placeholder="Type your message..."
           placeholderTextColor="gray"
+          autoFocus // Automatically focus on the input
+          onSubmitEditing={sendText} // Send message on enter
         />
-        <TouchableOpacity onPress={sendText}>
+        <TouchableOpacity
+          onPress={sendText}
+          accessibilityLabel="Send Message"
+          accessibilityRole="button"
+        >
           <Image
-            source={require('../assets/images/send_message.png')} // WhatsApp-style send icon
+            source={require('../assets/images/send_message.png')}
             style={styles.send_message_Image}
           />
         </TouchableOpacity>
@@ -87,70 +137,80 @@ const ChatScreen = ({navigation}) => {
 
 export default ChatScreen;
 
+// Stylesheet
 const styles = StyleSheet.create({
-  View: {flex: 1, backgroundColor: '#d7f9f3'},
-  backgroundImage: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover', // WhatsApp-like background image
-  },
-  TextInputView: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    padding: 10,
-    flexDirection: 'row',
-    backgroundColor: '#f6f6f6',
-    alignItems: 'center',
-    elevation: 2,
-  },
-  TextInput: {
-    borderRadius: 25,
-    backgroundColor: '#ffffff',
+  container: {
     flex: 1,
-    padding: 10,
-    marginRight: 10,
-    fontSize: 16,
-    color: 'black',
-  },
-  send_message_Image: {
-    height: 40,
-    width: 40,
-    tintColor: '#34B7F1', // WhatsApp blue for the send icon
+    backgroundColor: '#F5F5F5',
   },
   ChatView: {
     flex: 1,
-    padding: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
   },
-  messageContainer: {
-    maxWidth: '80%',
-    marginVertical: 5,
+  TextInputView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
+  },
+  TextInput: {
+    flex: 1,
     padding: 10,
     borderRadius: 20,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
+    marginRight: 10,
+    fontSize: 16,
+    color: '#333',
+  },
+  send_message_Image: {
+    width: 30,
+    height: 30,
+    tintColor: '#007AFF', // iOS blue color for send icon
+  },
+  messageContainer: {
+    marginBottom: 10,
+    maxWidth: '80%',
+    padding: 10,
+    borderRadius: 20,
   },
   sentMessage: {
-    backgroundColor: '#dcf8c6',
     alignSelf: 'flex-end',
+    backgroundColor: '#DCF8C6', // WhatsApp-like green color
+    borderBottomRightRadius: 0, // To give a speech-bubble effect
   },
   receivedMessage: {
-    backgroundColor: '#ffffff',
     alignSelf: 'flex-start',
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 0,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   ChatText: {
     fontSize: 16,
-  },
-  ChatSenderText: {
-    color: 'black',
-  },
-  ChatReceiverText: {
-    color: 'black',
+    color: '#333',
   },
   messageTime: {
-    alignSelf: 'flex-end',
     fontSize: 12,
     color: 'gray',
+    alignSelf: 'flex-end',
     marginTop: 5,
+  },
+  ChatHeader: {
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    backgroundColor: '#007AFF',
+  },
+  ChatHeaderText: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });

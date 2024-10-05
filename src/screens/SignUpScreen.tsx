@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {StyleSheet, View, Alert} from 'react-native';
-import auth from '@react-native-firebase/auth'; // Correct import for Firebase Auth
+import auth from '@react-native-firebase/auth';
 import AuthForm from '../components/AuthForm';
 import {useSelector} from 'react-redux';
 
