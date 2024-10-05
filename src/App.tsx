@@ -1,5 +1,6 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/no-unstable-nested-components */
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Provider} from 'react-redux';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
@@ -15,10 +16,11 @@ import OTPScreen from './screens/OTPScreen';
 import AddScreen from './screens/AddScreen';
 import ChatScreen from './screens/ChatScreen';
 import {Image} from 'react-native';
-// Statically import your images
 import HomeIcon from './assets/images/home.png';
 import PlusIcon from './assets/images/plus.png';
 import ProfileIcon from './assets/images/profile.png';
+import ForgotPassword from './screens/ForgotPassword';
+import SplashScreen from 'react-native-splash-screen';
 
 enableScreens();
 
@@ -26,12 +28,22 @@ const App = () => {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
 
+  useEffect(() => {
+    // Hide the splash screen after a short delay or when your app is ready
+    const timer = setTimeout(() => {
+      SplashScreen.hide();
+    }, 3000); // Adjust this delay as necessary
+
+    return () => clearTimeout(timer); // Cleanup timer on unmount
+  }, []);
+
+
   const MainFlow = () => {
     return (
       <Tab.Navigator
         initialRouteName="Add"
         screenOptions={({route}) => ({
-          tabBarIcon: ({focused, color, size}) => {
+          tabBarIcon: ({focused, color}) => {
             let iconSource;
 
             // Choose the correct icon based on the route name
@@ -76,9 +88,11 @@ const App = () => {
         <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="OTP" component={OTPScreen} />
+        <Stack.Screen name="Forgot" component={ForgotPassword} />
       </Stack.Navigator>
     );
   };
+
   const ChatFlow = () => {
     return (
       <Stack.Navigator screenOptions={{headerShown: false}}>
@@ -86,6 +100,7 @@ const App = () => {
       </Stack.Navigator>
     );
   };
+
   return (
     <Provider store={store}>
       <GestureHandlerRootView style={{flex: 1}}>

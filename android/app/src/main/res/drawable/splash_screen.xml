@@ -1,0 +1,7 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/black" /> <!-- Ensure this line points to an existing color -->
+    <item>
+        <bitmap
+            android:src="@drawable/splash_image" /> <!-- Replace with your actual splash image -->
+    </item>
+</layer-list>

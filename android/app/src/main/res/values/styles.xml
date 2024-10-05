@@ -5,5 +5,9 @@
         <!-- Customize your theme here. -->
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     </style>
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item> <!-- Make sure this points to your splash screen drawable -->
+        <item name="android:windowNoTitle">true</item>
+    </style>
 
 </resources>

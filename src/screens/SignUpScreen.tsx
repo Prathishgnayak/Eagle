@@ -2,9 +2,11 @@ import React, {useState} from 'react';
 import {StyleSheet, View, Alert} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import AuthForm from '../components/AuthForm';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {setUid} from '../redux/slices/AuthSlice';
 
 const SignUpScreen = ({navigation}) => {
+  const dispatch = useDispatch();
   const email = useSelector(state => state.auth.email);
   const password = useSelector(state => state.auth.password);
 
@@ -20,6 +22,7 @@ const SignUpScreen = ({navigation}) => {
         .then(userCredential => {
           // User registered successfully
           const uid = userCredential.user.uid;
+          dispatch(setUid(uid));
           console.log('User UID: ', uid);
         })
         .catch(error => {

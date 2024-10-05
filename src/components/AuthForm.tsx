@@ -42,7 +42,10 @@ const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
         />
 
         {title === 'Sign In' ? (
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('Forgot');
+            }}>
             <Text style={styles.forgotPassWord}>Forgot Password..?</Text>
           </TouchableOpacity>
         ) : null}

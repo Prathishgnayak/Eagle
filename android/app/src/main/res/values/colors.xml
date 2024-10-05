@@ -1,0 +1,4 @@
+<resources>
+    <color name="black">#000000</color> <!-- Add this line -->
+    <!-- You may also define other colors here -->
+</resources>
