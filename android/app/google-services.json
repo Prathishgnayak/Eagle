@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "851671427134",
+    "project_id": "eagle-a524b",
+    "storage_bucket": "eagle-a524b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:851671427134:android:e341bf3390385195a3896f",
+        "android_client_info": {
+          "package_name": "com.eagle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZxXndDxOlhb0almbRNaK5QO3wgHa5rBk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
