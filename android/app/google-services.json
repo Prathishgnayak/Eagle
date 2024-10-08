@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "851671427134",
+    "firebase_url": "https://eagle-a524b-default-rtdb.firebaseio.com",
     "project_id": "eagle-a524b",
     "storage_bucket": "eagle-a524b.appspot.com"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.eagle"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "851671427134-ujgimab3j2hakkchfpasf8g0b349svd7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eagle",
+            "certificate_hash": "ea5246171c18b632d7ac985a0f5e97e68b8ce150"
+          }
+        },
+        {
+          "client_id": "851671427134-0ok70ugqueior6e389lq0s61kq9orhqe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBZxXndDxOlhb0almbRNaK5QO3wgHa5rBk"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "851671427134-0ok70ugqueior6e389lq0s61kq9orhqe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

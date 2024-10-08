@@ -9,6 +9,7 @@ import {
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {setEmail, setPassword} from '../redux/slices/AuthSlice';
+import GoogleSign from './GoogleSign';
 
 const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
   const dispatch = useDispatch();
@@ -71,12 +72,7 @@ const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
         <View>
           <Text style={styles.orText}>------- or --------</Text>
           <View style={styles.OtherSignInView}>
-            <TouchableOpacity style={styles.emailButton}>
-              <Image
-                source={require('../assets/images/google.png')}
-                style={styles.GoogleImage}
-              />
-            </TouchableOpacity>
+            <GoogleSign navigation={navigation} />
 
             <TouchableOpacity style={styles.emailButton}>
               <Image

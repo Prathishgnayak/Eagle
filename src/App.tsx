@@ -12,7 +12,6 @@ import SignInScreen from './screens/SignInScreen';
 import HomeScreen from './screens/HomeScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import SignUpScreen from './screens/SignUpScreen';
-import OTPScreen from './screens/OTPScreen';
 import AddScreen from './screens/AddScreen';
 import ChatScreen from './screens/ChatScreen';
 import {Image} from 'react-native';
@@ -21,6 +20,7 @@ import PlusIcon from './assets/images/plus.png';
 import ProfileIcon from './assets/images/profile.png';
 import ForgotPassword from './screens/ForgotPassword';
 import SplashScreen from 'react-native-splash-screen';
+import AuthScreen from './screens/AuthScreen';
 
 enableScreens();
 
@@ -36,7 +36,6 @@ const App = () => {
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
   }, []);
-
 
   const MainFlow = () => {
     return (
@@ -87,7 +86,7 @@ const App = () => {
         screenOptions={{headerShown: false}}>
         <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
-        <Stack.Screen name="OTP" component={OTPScreen} />
+        <Stack.Screen name="OTP" component={AuthScreen} />
         <Stack.Screen name="Forgot" component={ForgotPassword} />
       </Stack.Navigator>
     );

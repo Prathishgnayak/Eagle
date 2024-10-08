@@ -2,6 +2,7 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const ProfileScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
@@ -13,6 +14,7 @@ const ProfileScreen = ({navigation}) => {
   const handleSignOut = async () => {
     try {
       await auth().signOut();
+      await GoogleSignin.signOut();
       console.log('logged out successfully');
       navigation.navigate('SignIn');
     } catch (error) {
