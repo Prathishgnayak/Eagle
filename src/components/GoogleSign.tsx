@@ -2,8 +2,13 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useEffect} from 'react';
 import auth from '@react-native-firebase/auth';
+import {useDispatch, useSelector} from 'react-redux';
+import {setIdToken, setPhoto, setEmail} from '../redux/slices/AuthSlice';
 
 const GoogleSign = ({navigation}) => {
+  const dispatch = useDispatch();
+  //const idToken = useSelector(state => state.auth.email);
+
   const handleGoogleSignIn = async () => {
     try {
       // Ensure any previous sign-in is cleared before attempting a new one
@@ -18,7 +23,11 @@ const GoogleSign = ({navigation}) => {
       console.log('User Info:', userInfo);
 
       const idToken = userInfo.idToken || userInfo.data.idToken;
+
       console.log(idToken);
+      dispatch(setIdToken(idToken));
+      dispatch(setPhoto(userInfo.data?.user.photo));
+      dispatch(setEmail(userInfo.data?.user.email));
 
       // if (!idToken) {
       //   throw new Error('Google Sign-In failed to retrieve ID token.');

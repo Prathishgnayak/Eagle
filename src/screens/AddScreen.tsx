@@ -74,7 +74,7 @@ const AddScreen = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.View}>
       {/* FlatList for displaying users */}
       <FlatList
         data={groupCreated ? group : users} // Show either the full user list or just the group
@@ -116,9 +116,10 @@ const AddScreen = ({navigation}) => {
 
 // Styles
 const styles = StyleSheet.create({
-  container: {
+  View: {
     flex: 1,
     padding: 16,
+    backgroundColor: '#cef8f0',
   },
   userCard: {
     flexDirection: 'row',

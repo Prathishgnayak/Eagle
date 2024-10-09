@@ -7,24 +7,25 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import ChatHeader from '../components/ChatHeader';
 import database from '@react-native-firebase/database';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 
-const ChatScreen = ({ navigation }) => {
-  const uid = useSelector((state) => state.auth.uid);
-  const email = useSelector((state) => state.auth.email);
-  const name = useSelector((state) => state.auth.name);
+const ChatScreen = ({navigation}) => {
+  const uid = useSelector(state => state.auth.uid);
+  const email = useSelector(state => state.auth.email);
+  const name = useSelector(state => state.auth.name);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const flatListRef = useRef();
 
   // Load messages from Firebase when component mounts
   useEffect(() => {
-    const messagesRef = database().ref(`/users/${uid}/messages`);
+    // const messagesRef = database().ref(`/users/${uid}/messages`);
+    const messagesRef = database().ref('/users/messages');
 
-    const onValueChange = (snapshot) => {
+    const onValueChange = snapshot => {
       const data = snapshot.val() || {};
       const messagesArray = Object.values(data);
 
@@ -53,19 +54,28 @@ const ChatScreen = ({ navigation }) => {
     if (message.trim()) {
       const newMessage = {
         text: message,
-        sentBy: { email, username: name },
+        sentBy: {email, username: name},
         time: formatTime(),
         timestamp: database.ServerValue.TIMESTAMP, // Store Firebase timestamp
       };
 
       // Save the message to Firebase and clear input field
+      // database()
+      //   .ref(`/users/${uid}/messages`)
+      //   .push(newMessage)
+      //   .then(() => {
+      //     setMessage(''); // Clear input field
+      //   })
+      //   .catch((error) => {
+      //     console.error('Error sending message:', error);
+      //   });
       database()
-        .ref(`/users/${uid}/messages`)
+        .ref('/users/messages')
         .push(newMessage)
         .then(() => {
           setMessage(''); // Clear input field
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Error sending message:', error);
         });
     }
@@ -73,7 +83,7 @@ const ChatScreen = ({ navigation }) => {
 
   // Render each message in the chat
   const renderMessage = useCallback(
-    ({ item }) => {
+    ({item}) => {
       const isSentByUser = item.sentBy.email === email;
 
       return (
@@ -81,20 +91,19 @@ const ChatScreen = ({ navigation }) => {
           style={[
             styles.messageContainer,
             isSentByUser ? styles.sentMessage : styles.receivedMessage,
-          ]}
-        >
+          ]}>
           <Text style={styles.ChatText}>{item.text}</Text>
           <Text style={styles.messageTime}>{item.time}</Text>
         </View>
       );
     },
-    [email]
+    [email],
   );
 
   // Scroll to the bottom when new messages arrive
   useEffect(() => {
     if (flatListRef.current) {
-      flatListRef.current.scrollToEnd({ animated: true });
+      flatListRef.current.scrollToEnd({animated: true});
     }
   }, [messages]);
 
@@ -107,7 +116,7 @@ const ChatScreen = ({ navigation }) => {
           data={messages}
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderMessage}
-          style={{ paddingBottom: 20 }} // Additional padding at the bottom
+          style={{paddingBottom: 20}} // Additional padding at the bottom
         />
       </View>
       <View style={styles.TextInputView}>
@@ -123,8 +132,7 @@ const ChatScreen = ({ navigation }) => {
         <TouchableOpacity
           onPress={sendText}
           accessibilityLabel="Send Message"
-          accessibilityRole="button"
-        >
+          accessibilityRole="button">
           <Image
             source={require('../assets/images/send_message.png')}
             style={styles.send_message_Image}

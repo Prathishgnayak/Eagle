@@ -1,5 +1,4 @@
 import {
-  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -10,6 +9,8 @@ import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {setEmail, setPassword} from '../redux/slices/AuthSlice';
 import GoogleSign from './GoogleSign';
+//import FaceBookSignIn from './FaceBookSignIn';
+import AppleSignIn from './AppleSignIn';
 
 const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
   const dispatch = useDispatch();
@@ -71,22 +72,11 @@ const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
       {title === 'Sign In' ? (
         <View>
           <Text style={styles.orText}>------- or --------</Text>
+
           <View style={styles.OtherSignInView}>
             <GoogleSign navigation={navigation} />
-
-            <TouchableOpacity style={styles.emailButton}>
-              <Image
-                source={require('../assets/images/facebook.png')}
-                style={styles.FacebookImage}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.emailButton}>
-              <Image
-                source={require('../assets/images/apple.png')}
-                style={styles.AppleImage}
-              />
-            </TouchableOpacity>
+            {/* <FaceBookSignIn navigation={navigation} />*/}
+            <AppleSignIn navigation={navigation} />
           </View>
         </View>
       ) : null}

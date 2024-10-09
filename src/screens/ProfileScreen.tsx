@@ -1,13 +1,18 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {resetState} from '../redux/slices/AuthSlice';
 
 const ProfileScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
   const password = useSelector(state => state.auth.password);
   const phoneNumber = useSelector(state => state.auth.phoneNumber);
+  const photo = useSelector(state => state.auth.photo);
+
+  const dispatch = useDispatch();
+  console.log(photo);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -15,6 +20,7 @@ const ProfileScreen = ({navigation}) => {
     try {
       await auth().signOut();
       await GoogleSignin.signOut();
+      await dispatch(resetState());
       console.log('logged out successfully');
       navigation.navigate('SignIn');
     } catch (error) {
@@ -25,43 +31,48 @@ const ProfileScreen = ({navigation}) => {
   return (
     <View style={styles.View}>
       <Text style={styles.Title}>Profile</Text>
-      <Image
-        source={require('../assets/images/black_image.png')}
-        style={styles.ProfileImage}
-      />
-      <Text style={styles.Text}>Email : {email}</Text>
-
-      <View style={styles.passwordView}>
-        {showPassword ? (
-          <Text style={styles.Text}>password : {password}</Text>
+      <View style={styles.CardView}>
+        {photo ? (
+          <Image source={{uri: photo}} style={styles.ProfileImage} />
         ) : (
-          <Text style={styles.Text}>password : _______</Text>
+          <Image
+            source={require('../assets/images/default_profile.png')}
+            style={styles.ProfileImage}
+          />
         )}
+        <Text style={styles.Text}>Email : {email}</Text>
 
-        {!showPassword ? (
-          <TouchableOpacity
-            onPress={() => {
-              setShowPassword(true);
-            }}>
-            <Image
-              source={require('../assets/images/view.png')}
-              style={styles.passwordShow}
-            />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            onPress={() => {
-              setShowPassword(false);
-            }}>
-            <Image
-              source={require('../assets/images/hide.png')}
-              style={styles.passwordHide}
-            />
-          </TouchableOpacity>
-        )}
+        <View style={styles.passwordView}>
+          {showPassword ? (
+            <Text style={styles.Text}>password : {password}</Text>
+          ) : (
+            <Text style={styles.Text}>password : </Text>
+          )}
+
+          {!showPassword ? (
+            <TouchableOpacity
+              onPress={() => {
+                setShowPassword(true);
+              }}>
+              <Image
+                source={require('../assets/images/view.png')}
+                style={styles.passwordShow}
+              />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => {
+                setShowPassword(false);
+              }}>
+              <Image
+                source={require('../assets/images/hide.png')}
+                style={styles.passwordHide}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+        <Text style={styles.Text}>Phone Number : {phoneNumber}</Text>
       </View>
-      <Text style={styles.Text}>Phone Number : {phoneNumber}</Text>
-
       <TouchableOpacity
         style={styles.SignOutButton}
         onPress={() => {
@@ -74,7 +85,23 @@ const ProfileScreen = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
-  View: {flex: 1, justifyContent: 'space-evenly', alignItems: 'center'},
+  View: {
+    flex: 1,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    backgroundColor: '#cef8f0',
+  },
+  CardView: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderColor: 'black',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 20,
+    height: '50%',
+    width: '90%',
+  },
   Text: {
     color: 'black',
     fontSize: 20,
@@ -91,7 +118,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: 'black',
     padding: 10,
-    margin: 10,
+    margin: 0,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
