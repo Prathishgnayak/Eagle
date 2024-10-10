@@ -4,6 +4,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {resetState} from '../redux/slices/AuthSlice';
+import {LoginManager} from 'react-native-fbsdk-next';
 
 const ProfileScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
@@ -20,6 +21,7 @@ const ProfileScreen = ({navigation}) => {
     try {
       await auth().signOut();
       await GoogleSignin.signOut();
+      await LoginManager.logOut();
       await dispatch(resetState());
       console.log('logged out successfully');
       navigation.navigate('SignIn');
@@ -95,8 +97,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'white',
-    borderColor: 'black',
-    borderWidth: 1,
+    elevation: 10,
     borderRadius: 10,
     padding: 20,
     height: '50%',

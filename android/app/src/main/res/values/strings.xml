@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Eagle</string>
+    <string name="facebook_app_id">390235004144872</string>
+    <string name="fb_login_protocol_scheme">fb390235004144872</string>
+    <string name="facebook_client_token">fc5f15daf47dea4cb61b5168a49e12e7</string>
+
 </resources>

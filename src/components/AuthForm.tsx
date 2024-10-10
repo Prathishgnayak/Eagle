@@ -11,6 +11,7 @@ import {setEmail, setPassword} from '../redux/slices/AuthSlice';
 import GoogleSign from './GoogleSign';
 //import FaceBookSignIn from './FaceBookSignIn';
 import AppleSignIn from './AppleSignIn';
+import SignInwithFacebook from './SignInwithFacebook';
 
 const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
   const dispatch = useDispatch();
@@ -75,9 +76,10 @@ const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
 
           <View style={styles.OtherSignInView}>
             <GoogleSign navigation={navigation} />
-            {/* <FaceBookSignIn navigation={navigation} />*/}
+            <SignInwithFacebook navigation={navigation} />
             <AppleSignIn navigation={navigation} />
           </View>
+          
         </View>
       ) : null}
     </View>

@@ -93,6 +93,11 @@ const ChatScreen = ({navigation}) => {
             isSentByUser ? styles.sentMessage : styles.receivedMessage,
           ]}>
           <Text style={styles.ChatText}>{item.text}</Text>
+          {!isSentByUser && (
+            <Text style={styles.messageTime}>
+              {item.sentBy.email.split('@gmail.com')}
+            </Text>
+          )}
           <Text style={styles.messageTime}>{item.time}</Text>
         </View>
       );

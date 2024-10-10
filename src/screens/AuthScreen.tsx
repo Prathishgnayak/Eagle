@@ -1,5 +1,4 @@
-// AuthScreen.js
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -7,213 +6,254 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
-const OTP_LENGTH = 6; // Define OTP length as a constant
-const OTP = '00000'; // Replace this with your actual OTP logic
+const OTP_LENGTH = 6;
 
-const AuthScreen = ({navigation}) => {
+const OtpScreen = ({navigation}) => {
   const [mobileNumber, setMobileNumber] = useState('');
-  const [otpArray, setOtpArray] = useState(new Array(OTP_LENGTH).fill(''));
   const [isOtpSent, setIsOtpSent] = useState(false);
-  const [timer, setTimer] = useState(60); // Timer state
-  const [isTimerActive, setIsTimerActive] = useState(false); // To check if the timer is active
+  const [otpArray, setOtpArray] = useState(new Array(OTP_LENGTH).fill(''));
+  const [timer, setTimer] = useState(59);
+  const [confirm, setConfirm] = useState(null);
   const otpInputs = useRef([]);
 
   useEffect(() => {
     let interval = null;
 
-    if (isTimerActive && timer > 0) {
-      interval = setInterval(() => {
-        setTimer(prevTimer => prevTimer - 1);
-      }, 1000);
-    } else if (!isTimerActive && timer !== 0) {
-      clearInterval(interval);
+    if (timer > 0 && isOtpSent) {
+      interval = setInterval(() => setTimer(prevTimer => prevTimer - 1), 1000);
     }
 
-    // Clear interval on component unmount
     return () => clearInterval(interval);
-  }, [isTimerActive, timer]);
+  }, [timer, isOtpSent]);
 
-  const handleSendOtp = () => {
-    // Logic to send OTP can be implemented here
-    console.log(`Sending OTP to ${mobileNumber}`);
-    setIsOtpSent(true);
-    setIsTimerActive(true);
-    setTimer(60); // Reset timer to 60 seconds
-  };
-
-  const handleVerifyOtp = () => {
-    const enteredOtp = otpArray.join('');
-    if (enteredOtp === OTP) {
-      console.log('Successfully verified');
-      navigation.navigate('MainFlow'); // Navigate to the main flow
-    } else {
-      console.log('Invalid OTP');
-      alert('Invalid OTP. Please try again.'); // Optional: Alert for invalid OTP
-    }
-  };
-
+  //Handle change in the text Input array
   const handleOtpChange = (value, index) => {
     const updatedOtpArray = [...otpArray];
     updatedOtpArray[index] = value;
     setOtpArray(updatedOtpArray);
 
-    // Move to the next input if a digit is entered
+    // Automatically focus the next input
     if (value && index < OTP_LENGTH - 1) {
       otpInputs.current[index + 1].focus();
     }
-
-    // Verify OTP when the last digit is entered
-    if (updatedOtpArray.every(otp => otp) && index === OTP_LENGTH - 1) {
-      handleVerifyOtp();
-    }
-  };
-
-  const handleOtpKeyPress = index => {
-    // Focus on the previous input if backspace is pressed
-    if (index > 0) {
+    // Automatically focus the previous input when a value cleared
+    if (!value && index > 0) {
       otpInputs.current[index - 1].focus();
     }
   };
 
-  const renderOtpInputs = () => {
-    return otpArray.map((_, index) => (
-      <TextInput
-        key={index}
-        ref={input => (otpInputs.current[index] = input)} // Reference to each input
-        style={styles.otpInput}
-        keyboardType="number-pad"
-        maxLength={1}
-        value={otpArray[index]}
-        onChangeText={value => handleOtpChange(value, index)}
-        onKeyPress={({nativeEvent}) => {
-          if (nativeEvent.key === 'Backspace') {
-            handleOtpKeyPress(index);
-          }
-        }}
-      />
-    ));
+  //Resend OTP
+  const handleResendOtp = () => {
+    setTimer(59);
+    setOtpArray(new Array(OTP_LENGTH).fill(''));
+    setIsOtpSent(false);
+    console.log('OTP resent');
+    handleSendOtp();
   };
 
-  const handleResendOtp = () => {
-    handleSendOtp(); // Resend OTP logic
+  // Function to send OTP using Firebase
+  const handleSendOtp = async () => {
+    try {
+      const phoneNumberWithCountryCode = `+91${mobileNumber}`; // Format the number
+      const confirmation = await auth().signInWithPhoneNumber(
+        phoneNumberWithCountryCode,
+      );
+
+      setConfirm(confirmation);
+      setIsOtpSent(true);
+      setTimer(59);
+
+      console.log('OTP sent successfully:', confirmation);
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+    }
+  };
+
+  // Function to verify the entered OTP
+  const handleVerifyOtp = async () => {
+    const enteredOtp = otpArray.join('');
+    if (confirm) {
+      try {
+        const response = await confirm.confirm(enteredOtp);
+        console.log('OTP verified successfully:', response);
+        navigation.navigate('MainFlow');
+      } catch (error) {
+        console.error('Invalid OTP:', error); // Log any error during OTP verification
+      }
+    } else {
+      console.log('No confirmation object found, please request OTP again.');
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        {isOtpSent ? 'Enter OTP' : 'Enter Your Mobile Number'}
-      </Text>
+      {/* Phone number Section */}
+      <Text style={styles.headerText}>Verify Phone Number</Text>
 
-      {!isOtpSent ? (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Mobile Number"
-            keyboardType="phone-pad"
-            value={mobileNumber}
-            onChangeText={setMobileNumber}
-            maxLength={10}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleSendOtp}>
-            <Text style={styles.buttonText}>Send OTP</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <>
-          <Text style={styles.subtitle}>
-            An OTP has been sent to {mobileNumber}
-          </Text>
-          <View style={styles.otpContainer}>{renderOtpInputs()}</View>
-          {timer > 0 ? (
-            <Text style={styles.timerText}>Resend OTP in {timer}s</Text>
-          ) : (
+      <View style={styles.CardView}>
+        {!isOtpSent ? (
+          <>
+            <Text style={styles.subHeaderText}>Enter your phone number</Text>
+            <TextInput
+              style={styles.phoneInput}
+              keyboardType="phone-pad"
+              placeholder="Phone Number"
+              value={mobileNumber}
+              onChangeText={setMobileNumber}
+              maxLength={14} // Adjust based on your requirements
+            />
             <TouchableOpacity
-              style={styles.resendButton}
-              onPress={handleResendOtp}>
-              <Text style={styles.buttonText}>Resend OTP</Text>
+              style={styles.sendOtpButton}
+              onPress={handleSendOtp}>
+              <Text style={styles.sendOtpButtonText}>Send OTP</Text>
             </TouchableOpacity>
-          )}
-        </>
-      )}
+          </>
+        ) : (
+          <>
+            {/* OTP Section */}
+            <Text style={styles.subHeaderText}>
+              OTP has been sent to{' '}
+              <Text style={styles.boldText}>{mobileNumber}</Text>
+            </Text>
+
+            <View style={styles.otpContainer}>
+              {otpArray.map((_, index) => (
+                <TextInput
+                  key={index}
+                  ref={input => (otpInputs.current[index] = input)}
+                  style={styles.otpInput}
+                  keyboardType="number-pad"
+                  maxLength={1}
+                  value={otpArray[index]}
+                  onChangeText={value => handleOtpChange(value, index)}
+                />
+              ))}
+            </View>
+
+            {timer > 0 ? (
+              <Text style={styles.timerText}>
+                Resend OTP in 00:{timer < 10 ? `0${timer}` : timer}
+              </Text>
+            ) : (
+              <TouchableOpacity onPress={handleResendOtp}>
+                <Text style={styles.resendText}>Resend OTP</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.verifyButton}
+              onPress={handleVerifyOtp}>
+              <Text style={styles.verifyButtonText}>Verify</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
     </View>
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
     backgroundColor: '#cef8f0',
   },
-  title: {
+  CardView: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    height: 350,
+    justifyContent: 'center',
+    paddingLeft: 20,
+    paddingRight: 20,
+    elevation: 10,
+    gap: 15,
+  },
+  headerText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
+    marginBottom: 8,
     color: '#333',
   },
-  subtitle: {
+  subHeaderText: {
     fontSize: 16,
-    marginBottom: 10,
     textAlign: 'center',
-    color: '#666',
+    marginBottom: 20,
+    marginTop: 20,
+    color: 'black',
   },
-  input: {
-    borderColor: '#007BFF',
-    borderWidth: 2,
-    borderRadius: 8,
-    paddingLeft: 10,
-    margin: 10,
-    backgroundColor: '#FFF',
+  boldText: {
+    fontWeight: '700',
+    color: '#333',
+  },
+  phoneInput: {
+    borderColor: '#000000',
+    borderWidth: 0,
+    borderRadius: 10,
+    padding: 15,
     fontSize: 16,
+    marginBottom: 20,
+    backgroundColor: '#FFF',
     color: '#000',
+    elevation: 10,
   },
-  button: {
-    backgroundColor: '#030000',
-    borderRadius: 8,
+  sendOtpButton: {
+    backgroundColor: '#4A90E2',
     paddingVertical: 15,
+    borderRadius: 10,
     alignItems: 'center',
-    marginTop: 10,
-    width: '80%',
-    alignSelf: 'center',
   },
-  buttonText: {
+  sendOtpButtonText: {
     color: '#FFF',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
+    marginBottom: 20,
   },
   otpInput: {
-    borderColor: '#007BFF',
-    borderWidth: 2,
-    borderRadius: 8,
-    width: 40,
+    borderColor: 'black',
+    borderWidth: 0,
+    borderRadius: 10,
+    width: 50,
     height: 50,
-    margin: 5,
+    marginHorizontal: 4,
     textAlign: 'center',
     fontSize: 18,
-    backgroundColor: '#FFF',
     color: '#000',
+    backgroundColor: '#FFF',
+    elevation: 10,
   },
   timerText: {
     textAlign: 'center',
-    marginTop: 10,
-    fontSize: 16,
-    color: '#FF0000',
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
   },
-  resendButton: {
-    marginTop: 20,
+  resendText: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#007BFF',
+    fontWeight: '500',
+    marginBottom: 20,
+  },
+  verifyButton: {
+    backgroundColor: '#4A90E2',
+    paddingVertical: 15,
+    borderRadius: 10,
     alignItems: 'center',
-    backgroundColor: '#007BFF',
-    paddingVertical: 10,
-    borderRadius: 8,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  verifyButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });
 
-export default AuthScreen;
+export default OtpScreen;
