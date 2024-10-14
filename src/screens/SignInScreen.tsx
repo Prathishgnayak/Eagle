@@ -55,7 +55,7 @@ const SignInScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   View: {
     flex: 1,
-   backgroundColor: '#cef8f0',
+    backgroundColor: '#cef8f0',
     justifyContent: 'center', // Center content vertically
     padding: 20, // Add padding
   },

@@ -7,6 +7,10 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {enableScreens} from 'react-native-screens';
+import {Image} from 'react-native';
+import SplashScreen from 'react-native-splash-screen';
+import ReactNativeBiometrics, {BiometryTypes} from 'react-native-biometrics';
+
 import store from './redux/store';
 import SignInScreen from './screens/SignInScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -14,13 +18,13 @@ import ProfileScreen from './screens/ProfileScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import AddScreen from './screens/AddScreen';
 import ChatScreen from './screens/ChatScreen';
-import {Image} from 'react-native';
 import HomeIcon from './assets/images/home.png';
 import PlusIcon from './assets/images/plus.png';
 import ProfileIcon from './assets/images/profile.png';
 import ForgotPassword from './screens/ForgotPassword';
-import SplashScreen from 'react-native-splash-screen';
+
 import AuthScreen from './screens/AuthScreen';
+import BiometricAuth from './components/BiometricAuth';
 
 enableScreens();
 
@@ -33,7 +37,7 @@ const App = () => {
     const timer = setTimeout(() => {
       SplashScreen.hide();
     }, 3000); // Adjust this delay as necessary
-
+    //BiometricAuth();
     return () => clearTimeout(timer); // Cleanup timer on unmount
   }, []);
 
