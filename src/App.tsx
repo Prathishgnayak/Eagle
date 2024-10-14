@@ -10,7 +10,6 @@ import {enableScreens} from 'react-native-screens';
 import {Image} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import BiometricAuth from './components/BiometricAuth';
-
 import store from './redux/store';
 import SignInScreen from './screens/SignInScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -23,6 +22,7 @@ import PlusIcon from './assets/images/plus.png';
 import ProfileIcon from './assets/images/profile.png';
 import ForgotPassword from './screens/ForgotPassword';
 import AuthScreen from './screens/AuthScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 enableScreens();
 
@@ -36,6 +36,7 @@ const App = () => {
       SplashScreen.hide();
     }, 50000); // Adjust this delay as necessary
     //BiometricAuth();
+
     return () => clearTimeout(timer); // Cleanup timer on unmount
   }, []);
 
@@ -65,6 +66,7 @@ const App = () => {
             );
           },
           headerShown: false,
+
           tabBarActiveTintColor: 'tomato',
           tabBarInactiveTintColor: 'gray',
           tabBarShowLabel: false,
@@ -111,7 +113,7 @@ const App = () => {
             screenOptions={{headerShown: false}}>
             <Stack.Screen name="AuthFlow" component={AuthFlow} />
             <Stack.Screen name="MainFlow" component={MainFlow} />
-            <Stack.Screen name="ChatFlow" component={ChatFlow} />
+            <Stack.Screen name="Chat" component={ChatScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>

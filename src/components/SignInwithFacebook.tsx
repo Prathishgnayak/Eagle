@@ -3,7 +3,14 @@ import React from 'react';
 import auth from '@react-native-firebase/auth';
 import {LoginManager, AccessToken, Profile} from 'react-native-fbsdk-next';
 import {useDispatch, useSelector} from 'react-redux';
-import {setEmail, setPhoto} from '../redux/slices/AuthSlice';
+import {
+  setEmail,
+  setIdToken,
+  setName,
+  setPhoto,
+  setUid,
+} from '../redux/slices/AuthSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignInwithFacebook = ({navigation}) => {
   const dispatch = useDispatch();
@@ -17,42 +24,45 @@ const SignInwithFacebook = ({navigation}) => {
         'public_profile',
         'email',
       ]);
-      console.log(1);
 
       if (result.isCancelled) {
         throw 'User cancelled the login process';
       }
-      console.log(2);
+
       // Once signed in, get the users AccessToken
       const data = await AccessToken.getCurrentAccessToken();
-      console.log(3);
+
       if (!data) {
         throw 'Something went wrong obtaining access token';
       }
-      console.log(4);
+
       // Create a Firebase credential with the AccessToken
       const facebookCredential = auth.FacebookAuthProvider.credential(
         data.accessToken,
       );
+      const idToken = await facebookCredential.token;
+      dispatch(setIdToken(idToken));
       console.log(facebookCredential);
-      console.log(5);
+      console.log('token frfrfr  ' + idToken);
+      await AsyncStorage.setItem('token', idToken);
 
       // Sign-in the user with the credential
 
       const userCredential = await auth().signInWithCredential(
         facebookCredential,
       );
-      console.log(6);
       const profile = await Profile.getCurrentProfile();
-      console.log(7);
+      const name = profile?.name;
+      dispatch(setName(name));
+
       console.log('UserCredential:', userCredential);
       console.log(userCredential.user.email);
       dispatch(setEmail(userCredential.user.email));
       dispatch(setPhoto(userCredential.user.photoURL));
+      dispatch(setUid(userCredential.user.uid));
       console.log('Profile:', profile);
 
       navigation.navigate('OTP');
-      console.log(8);
     } catch (error) {
       console.error(error);
     }

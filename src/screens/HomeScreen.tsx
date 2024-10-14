@@ -133,7 +133,7 @@ const HomeScreen = ({navigation}) => {
             <View>
               <View style={styles.CardView}>
                 <TouchableOpacity>
-                  <Image source={{uri: item.avatar}} style={styles.avatar} />
+                  {/* <Image source={{uri: item.avatar}} style={styles.avatar} /> */}
                   {/* <Text style={styles.Text}>{item.name}</Text> */}
                   <Text style={styles.Text}>{item.id}</Text>
                 </TouchableOpacity>
@@ -152,7 +152,7 @@ const HomeScreen = ({navigation}) => {
             <View>
               <View style={styles.CardView}>
                 <TouchableOpacity>
-                  <Image source={{uri: item.avatar}} style={styles.avatar} />
+                  {/* <Image source={{uri: item.avatar}} style={styles.avatar} /> */}
                   <Text style={styles.Text}>{item.name}</Text>
                 </TouchableOpacity>
               </View>
@@ -189,12 +189,12 @@ const styles = StyleSheet.create({
   Text: {
     color: 'black',
   },
-  titleText:{
-    color:'black',
-    fontSize:20,
-    alignSelf:'center',
-    padding:20
-  }
+  titleText: {
+    color: 'black',
+    fontSize: 20,
+    alignSelf: 'center',
+    padding: 20,
+  },
 });
 
 export default HomeScreen;

@@ -12,7 +12,11 @@ import ChatHeader from '../components/ChatHeader';
 import database from '@react-native-firebase/database';
 import {useSelector} from 'react-redux';
 
-const ChatScreen = ({navigation}) => {
+const ChatScreen = ({route, navigation}) => {
+  const {chatId, name2} = route.params;
+  let {avatar} = route.params;
+  !avatar ? (avatar = 'https://i.sstatic.net/l60Hf.png') : null;
+  console.log(chatId);
   const uid = useSelector(state => state.auth.uid);
   const email = useSelector(state => state.auth.email);
   const name = useSelector(state => state.auth.name);
@@ -22,30 +26,29 @@ const ChatScreen = ({navigation}) => {
 
   // Load messages from Firebase when component mounts
   useEffect(() => {
-    // const messagesRef = database().ref(`/users/${uid}/messages`);
-    const messagesRef = database().ref('/users/messages');
+    const messagesRef = database().ref(`/chats/${chatId}/messages`); // Use chatId to access messages of the specific chat
 
     const onValueChange = snapshot => {
       const data = snapshot.val() || {};
       const messagesArray = Object.values(data);
 
-      // Sort messages by timestamp (if available)
-      messagesArray.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+      // Sort messages by timestamp
+      messagesArray.sort((a, b) => a.timestamp - b.timestamp);
 
       setMessages(messagesArray);
     };
 
     messagesRef.on('value', onValueChange);
 
-    return () => messagesRef.off('value', onValueChange); // Clean up subscription on unmount
-  }, [uid]);
+    return () => messagesRef.off('value', onValueChange); // Cleanup listener on unmount
+  }, [chatId]); // Re-run effect when chatId changes
 
   // Format the current time for displaying message time
   const formatTime = () => {
     return new Date().toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: true, // Use 12-hour format
+      hour12: true,
     });
   };
 
@@ -54,37 +57,29 @@ const ChatScreen = ({navigation}) => {
     if (message.trim()) {
       const newMessage = {
         text: message,
-        sentBy: {email, username: name},
+        sender: email,
+        username: name,
         time: formatTime(),
-        timestamp: database.ServerValue.TIMESTAMP, // Store Firebase timestamp
+        timestamp: database.ServerValue.TIMESTAMP, // Firebase timestamp
       };
 
-      // Save the message to Firebase and clear input field
-      // database()
-      //   .ref(`/users/${uid}/messages`)
-      //   .push(newMessage)
-      //   .then(() => {
-      //     setMessage(''); // Clear input field
-      //   })
-      //   .catch((error) => {
-      //     console.error('Error sending message:', error);
-      //   });
+      // Save the message to Firebase under the correct chatId
       database()
-        .ref('/users/messages')
+        .ref(`/chats/${chatId}/messages`) // Ensure that the message is saved under the specific chat's ID
         .push(newMessage)
         .then(() => {
-          setMessage(''); // Clear input field
+          setMessage(''); // Clear input field after sending
         })
         .catch(error => {
           console.error('Error sending message:', error);
         });
     }
-  }, [message, uid, email, name]);
+  }, [message, chatId, email, name]);
 
   // Render each message in the chat
   const renderMessage = useCallback(
     ({item}) => {
-      const isSentByUser = item.sentBy.email === email;
+      const isSentByUser = item.sender === email;
 
       return (
         <View
@@ -94,9 +89,7 @@ const ChatScreen = ({navigation}) => {
           ]}>
           <Text style={styles.ChatText}>{item.text}</Text>
           {!isSentByUser && (
-            <Text style={styles.messageTime}>
-              {item.sentBy.email.split('@gmail.com')}
-            </Text>
+            <Text style={styles.messageTime}>{item.username}</Text>
           )}
           <Text style={styles.messageTime}>{item.time}</Text>
         </View>
@@ -114,14 +107,14 @@ const ChatScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <ChatHeader navigation={navigation} />
+      <ChatHeader navigation={navigation} avatar={avatar} name={name2} />
       <View style={styles.ChatView}>
         <FlatList
           ref={flatListRef}
           data={messages}
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderMessage}
-          style={{paddingBottom: 20}} // Additional padding at the bottom
+          style={{paddingBottom: 20}} // Padding at the bottom for spacing
         />
       </View>
       <View style={styles.TextInputView}>
@@ -131,7 +124,7 @@ const ChatScreen = ({navigation}) => {
           onChangeText={setMessage}
           placeholder="Type your message..."
           placeholderTextColor="gray"
-          autoFocus // Automatically focus on the input
+          autoFocus
           onSubmitEditing={sendText} // Send message on enter
         />
         <TouchableOpacity
@@ -184,7 +177,7 @@ const styles = StyleSheet.create({
   send_message_Image: {
     width: 30,
     height: 30,
-    tintColor: '#007AFF', // iOS blue color for send icon
+    tintColor: '#007AFF',
   },
   messageContainer: {
     marginBottom: 10,
@@ -194,8 +187,8 @@ const styles = StyleSheet.create({
   },
   sentMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#DCF8C6', // WhatsApp-like green color
-    borderBottomRightRadius: 0, // To give a speech-bubble effect
+    backgroundColor: '#DCF8C6',
+    borderBottomRightRadius: 0,
   },
   receivedMessage: {
     alignSelf: 'flex-start',
@@ -213,17 +206,5 @@ const styles = StyleSheet.create({
     color: 'gray',
     alignSelf: 'flex-end',
     marginTop: 5,
-  },
-  ChatHeader: {
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    backgroundColor: '#007AFF',
-  },
-  ChatHeaderText: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
   },
 });

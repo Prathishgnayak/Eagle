@@ -5,15 +5,37 @@ import auth from '@react-native-firebase/auth';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {resetState} from '../redux/slices/AuthSlice';
 import {LoginManager} from 'react-native-fbsdk-next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
   const password = useSelector(state => state.auth.password);
   const phoneNumber = useSelector(state => state.auth.phoneNumber);
   const photo = useSelector(state => state.auth.photo);
+  const idToken = useSelector(state => state.auth.idToken);
+  const uid = useSelector(state => state.auth.uid);
+  const name = useSelector(state => state.auth.name);
+  const status = useSelector(state => state.auth.status);
 
+  console.log(
+    'Email : ' +
+      email +
+      '  password :   ' +
+      password +
+      '  Number :   ' +
+      phoneNumber +
+      '  photo :   ' +
+      photo +
+      '  TOken :   ' +
+      idToken +
+      '  uid :   ' +
+      uid +
+      '  name :   ' +
+      name +
+      '  status :   ' +
+      status,
+  );
   const dispatch = useDispatch();
-  console.log(photo);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -25,6 +47,7 @@ const ProfileScreen = ({navigation}) => {
       await dispatch(resetState());
       console.log('logged out successfully');
       navigation.navigate('SignIn');
+      await AsyncStorage.removeItem('token');
     } catch (error) {
       console.error(error);
     }
@@ -44,7 +67,7 @@ const ProfileScreen = ({navigation}) => {
         )}
         <Text style={styles.Text}>Email : {email}</Text>
 
-        <View style={styles.passwordView}>
+        {/* <View style={styles.passwordView}>
           {showPassword ? (
             <Text style={styles.Text}>password : {password}</Text>
           ) : (
@@ -72,8 +95,7 @@ const ProfileScreen = ({navigation}) => {
               />
             </TouchableOpacity>
           )}
-        </View>
-        <Text style={styles.Text}>Phone Number : {phoneNumber}</Text>
+        </View> */}
       </View>
       <TouchableOpacity
         style={styles.SignOutButton}

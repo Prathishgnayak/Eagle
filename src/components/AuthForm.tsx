@@ -1,4 +1,5 @@
 import {
+  Button,
   StyleSheet,
   Text,
   TextInput,
@@ -7,7 +8,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {setEmail, setPassword} from '../redux/slices/AuthSlice';
+import {setEmail, setName, setPassword} from '../redux/slices/AuthSlice';
 import GoogleSign from './GoogleSign';
 //import FaceBookSignIn from './FaceBookSignIn';
 import AppleSignIn from './AppleSignIn';
@@ -17,10 +18,24 @@ const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
   const dispatch = useDispatch();
   const email = useSelector(state => state.auth.email);
   const password = useSelector(state => state.auth.password);
+  const name = useSelector(state => state.auth.name);
   return (
     <View>
       <View style={styles.CardView}>
         <Text style={styles.title}>{title}</Text>
+        {title === 'Sign Up' ? (
+          <TextInput
+            value={name}
+            onChangeText={text => {
+              dispatch(setName(text));
+            }}
+            placeholder="Username"
+            placeholderTextColor="grey"
+            style={styles.TextInput}
+            keyboardType="default"
+            accessibilityLabel="Email input"
+          />
+        ) : null}
         <TextInput
           value={email}
           onChangeText={text => {
@@ -79,7 +94,12 @@ const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
             <SignInwithFacebook navigation={navigation} />
             <AppleSignIn navigation={navigation} />
           </View>
-          
+          <Button
+            title="Profile"
+            onPress={() => {
+              navigation.navigate('MainFlow');
+            }}
+          />
         </View>
       ) : null}
     </View>

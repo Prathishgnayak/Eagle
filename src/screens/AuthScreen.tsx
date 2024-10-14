@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import UserInfo from '../components/UserInfo'; // Ensure this is a function that doesn't have hooks directly
+import {useSelector} from 'react-redux';
+import database from '@react-native-firebase/database';
 
 const OTP_LENGTH = 6;
 
@@ -18,17 +21,43 @@ const OtpScreen = ({navigation}) => {
   const [confirm, setConfirm] = useState(null);
   const otpInputs = useRef([]);
 
+  const user = {
+    email: useSelector(state => state.auth.email),
+    phoneNumber: useSelector(state => state.auth.phoneNumber),
+    photo: useSelector(state => state.auth.photo),
+    idToken: useSelector(state => state.auth.idToken),
+    uid: useSelector(state => state.auth.uid),
+    name: useSelector(state => state.auth.name),
+    status: useSelector(state => state.auth.status),
+  };
   useEffect(() => {
     let interval = null;
 
-    if (timer > 0 && isOtpSent) {
+    // Storing user data in Firebase under their unique UID
+    database()
+      .ref(`/users/${user.uid}`)
+      .set({
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        photo: user.photo,
+        idToken: user.idToken, // It's fine to store the ID token temporarily
+        name: user.name,
+        status: user.status,
+      })
+      .then(() => {
+        console.log('User details stored in DB');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    if (isOtpSent && timer > 0) {
       interval = setInterval(() => setTimer(prevTimer => prevTimer - 1), 1000);
     }
 
     return () => clearInterval(interval);
   }, [timer, isOtpSent]);
 
-  //Handle change in the text Input array
+  // Handle OTP input change
   const handleOtpChange = (value, index) => {
     const updatedOtpArray = [...otpArray];
     updatedOtpArray[index] = value;
@@ -38,13 +67,13 @@ const OtpScreen = ({navigation}) => {
     if (value && index < OTP_LENGTH - 1) {
       otpInputs.current[index + 1].focus();
     }
-    // Automatically focus the previous input when a value cleared
+    // Automatically focus the previous input when a value is cleared
     if (!value && index > 0) {
       otpInputs.current[index - 1].focus();
     }
   };
 
-  //Resend OTP
+  // Resend OTP
   const handleResendOtp = () => {
     setTimer(59);
     setOtpArray(new Array(OTP_LENGTH).fill(''));
@@ -53,10 +82,10 @@ const OtpScreen = ({navigation}) => {
     handleSendOtp();
   };
 
-  // Function to send OTP using Firebase
+  // Send OTP via Firebase
   const handleSendOtp = async () => {
     try {
-      const phoneNumberWithCountryCode = `+91${mobileNumber}`; // Format the number
+      const phoneNumberWithCountryCode = `+91${mobileNumber}`; // Format number
       const confirmation = await auth().signInWithPhoneNumber(
         phoneNumberWithCountryCode,
       );
@@ -71,19 +100,20 @@ const OtpScreen = ({navigation}) => {
     }
   };
 
-  // Function to verify the entered OTP
+  // Verify OTP
   const handleVerifyOtp = async () => {
     const enteredOtp = otpArray.join('');
-    if (confirm) {
+    if (confirm && enteredOtp.length === OTP_LENGTH) {
       try {
         const response = await confirm.confirm(enteredOtp);
         console.log('OTP verified successfully:', response);
         navigation.navigate('MainFlow');
       } catch (error) {
-        console.error('Invalid OTP:', error); // Log any error during OTP verification
+        console.error('Invalid OTP:', error);
+        alert('The OTP you entered is incorrect. Please try again.');
       }
     } else {
-      console.log('No confirmation object found, please request OTP again.');
+      alert('Please enter the full OTP or request a new one.');
     }
   };
 
@@ -102,7 +132,7 @@ const OtpScreen = ({navigation}) => {
               placeholder="Phone Number"
               value={mobileNumber}
               onChangeText={setMobileNumber}
-              maxLength={14} // Adjust based on your requirements
+              maxLength={14} // Adjust for your format
             />
             <TouchableOpacity
               style={styles.sendOtpButton}

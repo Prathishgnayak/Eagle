@@ -3,7 +3,14 @@ import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useEffect} from 'react';
 import auth from '@react-native-firebase/auth';
 import {useDispatch, useSelector} from 'react-redux';
-import {setIdToken, setPhoto, setEmail} from '../redux/slices/AuthSlice';
+import {
+  setIdToken,
+  setPhoto,
+  setEmail,
+  setName,
+  setUid,
+} from '../redux/slices/AuthSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GoogleSign = ({navigation}) => {
   const dispatch = useDispatch();
@@ -21,11 +28,13 @@ const GoogleSign = ({navigation}) => {
       // Get the user's ID token
       const userInfo = await GoogleSignin.signIn();
       console.log('User Info:', userInfo);
-
+      const name = userInfo.data?.user.name;
+      dispatch(setName(name));
       const idToken = userInfo.idToken || userInfo.data.idToken;
 
       console.log(idToken);
       dispatch(setIdToken(idToken));
+      await AsyncStorage.setItem('token', idToken);
       dispatch(setPhoto(userInfo.data?.user.photo));
       dispatch(setEmail(userInfo.data?.user.email));
 
@@ -33,14 +42,13 @@ const GoogleSign = ({navigation}) => {
       //   throw new Error('Google Sign-In failed to retrieve ID token.');
       // }
 
-      // Create a Google credential with the token
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
 
-      // Sign in the user with the credential
       const userCredential = await auth().signInWithCredential(
         googleCredential,
       );
-      console.log('User signed in successfully:', userCredential);
+
+      dispatch(setUid(userCredential.user.uid));
 
       navigation.navigate('OTP');
     } catch (error) {

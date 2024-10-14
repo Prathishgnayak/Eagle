@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, Alert} from 'react-native';
 import auth from '@react-native-firebase/auth'; // Correct import for Firebase Auth
 import AuthForm from '../components/AuthForm';
 import {useDispatch, useSelector} from 'react-redux';
-import {setUid} from '../redux/slices/AuthSlice';
+import {setIdToken, setUid} from '../redux/slices/AuthSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignInScreen = ({navigation}) => {
   const dispatch = useDispatch();
@@ -17,19 +18,25 @@ const SignInScreen = ({navigation}) => {
     }
 
     try {
-      await auth()
-        .signInWithEmailAndPassword(email, password)
-        .then(userCredential => {
-          // User registered successfully
-          const uid = userCredential.user.uid;
-          dispatch(setUid(uid));
-          console.log(userCredential);
-          console.log('User UID: ', uid);
-        })
-        .catch(error => {
-          console.error(error);
-        });
+      const userCredential = await auth().signInWithEmailAndPassword(
+        email,
+        password,
+      );
+
+      // Get user ID and dispatch it
+      const uid = userCredential.user.uid;
+      dispatch(setUid(uid));
+
+      // Get the ID token
+      const idToken = await userCredential.user.getIdToken();
+
+      // Use the ID token (e.g., dispatch or store it)
+      console.log(idToken);
+      dispatch(setIdToken(idToken));
+      await AsyncStorage.setItem('token', idToken);
+
       console.log('Logged In with Email: ' + email);
+      //navigation.navigate('OTP');
       navigation.navigate('OTP');
 
       // Optionally navigate to another screen after successful login
@@ -38,7 +45,20 @@ const SignInScreen = ({navigation}) => {
       Alert.alert('Login Error', error.message); // Show user-friendly error message
     }
   };
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          navigation.navigate('MainFlow'); // Navigate to your main screen if the token exists
+        }
+      } catch (error) {
+        console.error('Error retrieving token:', error);
+      }
+    };
 
+    checkToken(); // Call the async function inside useEffect
+  }, [navigation]);
   return (
     <View style={styles.View}>
       <AuthForm

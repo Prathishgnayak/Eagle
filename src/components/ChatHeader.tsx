@@ -2,17 +2,17 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import Back from './Back';
 
-const ChatHeader = ({navigation}) => {
+const ChatHeader = ({navigation, avatar, name}) => {
   return (
     <View style={styles.View}>
       <View style={styles.CardView}>
         <Back navigation={navigation} />
         <Image
-          source={require('../assets/images/black_image.png')} // Profile image
+          source={{uri: `${avatar}`}} // Profile image
           style={styles.BlackImage}
         />
         <View>
-          <Text style={styles.HeaderText}>Group Name</Text>
+          <Text style={styles.HeaderText}>{name}</Text>
           <Text style={styles.SubHeaderText}>Online</Text>
         </View>
       </View>

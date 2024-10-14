@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -7,70 +7,103 @@ import {
   View,
   Image,
 } from 'react-native';
+import database from '@react-native-firebase/database';
+import {useSelector} from 'react-redux';
 
 const AddScreen = ({navigation}) => {
-  // Initial list of users (you could fetch this from a backend)
-  const userList = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com',
-      avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-    },
-    {
-      id: 3,
-      name: 'Sam Johnson',
-      email: 'sam@example.com',
-      avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
-    },
-    {
-      id: 4,
-      name: 'Sara Adams',
-      email: 'sara@example.com',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    },
-    {
-      id: 5,
-      name: 'Tom Lee',
-      email: 'tom@example.com',
-      avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
-    },
-    {
-      id: 6,
-      name: 'Emily Clark',
-      email: 'emily@example.com',
-      avatar: 'https://randomuser.me/api/portraits/women/3.jpg',
-    },
-    {
-      id: 7,
-      name: 'Mark Davis',
-      email: 'mark@example.com',
-      avatar: 'https://randomuser.me/api/portraits/men/4.jpg',
-    },
-    {
-      id: 8,
-      name: 'Olivia Brown',
-      email: 'olivia@example.com',
-      avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
-    },
-  ];
-
-  const [users, setUsers] = useState(userList); // List of all users
+  const email = useSelector(state => state.auth.email);
+  const [users, setUsers] = useState([]); // List of all users fetched from Firebase
   const [group, setGroup] = useState([]); // Random group of users
   const [groupCreated, setGroupCreated] = useState(false); // Toggle create group button and chat button
 
-  // Function to create a random group
+  // Function to fetch user list from Firebase
+  const fetchUsers = async () => {
+    try {
+      const snapshot = await database().ref('/users').once('value');
+      const usersData = snapshot.val();
+
+      // Map the data to extract user id, name, email, and photo
+      const userList = Object.keys(usersData).map(userId => {
+        const user = usersData[userId];
+        return {
+          id: userId,
+          name: user.name || 'Anonymous',
+          email: user.email || 'No email',
+          avatar: user.photo || 'https://i.sstatic.net/l60Hf.png',
+        };
+      });
+
+      setUsers(userList);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // Function to create a random group of 4 users
+  // const createRandomGroup = () => {
+  //   const shuffledUsers = users.sort(() => 0.5 - Math.random());
+  //   const randomGroup = shuffledUsers.slice(0, 3); // Select random 4 users
+  //   setGroup(randomGroup);
+  //   setGroupCreated(true);
+  // };
+
   const createRandomGroup = () => {
-    const shuffledUsers = userList.sort(() => 0.5 - Math.random());
-    const randomGroup = shuffledUsers.slice(0, 4); // Select random 4 users
+    // Filter out the current user's email from the user list
+    const filteredUsers = users.filter(user => user.email !== email);
+
+    // Shuffle the filtered user list and select 3 random users
+    const shuffledUsers = filteredUsers.sort(() => 0.5 - Math.random());
+    const randomGroup = shuffledUsers.slice(0, 3); // Select 3 users
+
     setGroup(randomGroup);
-    setGroupCreated(true); // Hide "Create" button and show "Start Chat"
+    setGroupCreated(true);
+  };
+
+  const handleOpenSingleChat = (user2email, avatar, name) => {
+    const chatId = createChatId(email, user2email);
+
+    console.log(email, chatId);
+
+    // Navigate to ChatScreen with the correct name and parameters
+    navigation.navigate('Chat', {chatId: chatId, avatar: avatar, name2: name});
+  };
+
+  const createChatId = (user1Email, user2Email) => {
+    console.log('Useremail' + user1Email);
+    // Sort emails alphabetically and replace disallowed characters
+    const sanitizedEmail1 = user1Email.replace(/\./g, ','); // Replaces '.' with ','
+    const sanitizedEmail2 = user2Email.replace(/\./g, ',');
+    console.log('sanitizedEmails  :  ' + sanitizedEmail1, sanitizedEmail2);
+    // Sort the emails alphabetically to ensure consistent chatId
+    const sortedEmails = [sanitizedEmail1, sanitizedEmail2].sort();
+    console.log('Sorted Emails  ' + sortedEmails);
+    // Join the sorted and sanitized emails to create the chatId
+    const chatId = `${sortedEmails[0]}_${sortedEmails[1]}`;
+
+    return chatId;
+  };
+
+  const createGroupChatId = (groupMembers, currentUserEmail) => {
+    // Add current user's email to the list of group members
+    const emails = [
+      ...groupMembers.map(member => member.email),
+      currentUserEmail,
+    ];
+
+    // Sanitize each email by replacing disallowed characters
+    const sanitizedEmails = emails.map(email => email.replace(/\./g, ','));
+
+    // Sort the emails alphabetically to ensure a consistent chatId
+    const sortedEmails = sanitizedEmails.sort();
+
+    // Join the sorted emails with an underscore to create the group chatId
+    const groupChatId = sortedEmails.join('_');
+
+    return groupChatId;
   };
 
   return (
@@ -80,13 +113,18 @@ const AddScreen = ({navigation}) => {
         data={groupCreated ? group : users} // Show either the full user list or just the group
         keyExtractor={item => item.id.toString()}
         renderItem={({item}) => (
-          <View style={styles.userCard}>
-            <Image source={{uri: item.avatar}} style={styles.avatar} />
-            <View style={styles.userInfo}>
-              <Text style={styles.userName}>{item.name}</Text>
-              <Text style={styles.userEmail}>{item.email}</Text>
+          <TouchableOpacity
+            onPress={() =>
+              handleOpenSingleChat(item.email, item.avatar, item.name)
+            }>
+            <View style={styles.userCard}>
+              <Image source={{uri: item.avatar}} style={styles.avatar} />
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>{item.name}</Text>
+                <Text style={styles.userEmail}>{item.email}</Text>
+              </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
 
@@ -104,8 +142,11 @@ const AddScreen = ({navigation}) => {
         <TouchableOpacity
           style={styles.chatButton}
           onPress={() => {
-            navigation.navigate('ChatFlow');
-            setGroup([]), setGroupCreated(false);
+          
+            let groupName = '6';
+            navigation.navigate('Chat', {chatId: groupName});
+            setGroup([]); // Clear group after navigating to chat
+            setGroupCreated(false); // Reset group creation flag
           }}>
           <Text style={styles.buttonText}>Start Chat</Text>
         </TouchableOpacity>
@@ -126,7 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f9f9f9',
     padding: 10,
-    marginVertical: 0,
+    marginVertical: 8,
     borderRadius: 8,
     borderColor: '#ddd',
     borderWidth: 1,

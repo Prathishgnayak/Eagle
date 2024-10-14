@@ -3,12 +3,14 @@ import {StyleSheet, View, Alert} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import AuthForm from '../components/AuthForm';
 import {useDispatch, useSelector} from 'react-redux';
-import {setUid} from '../redux/slices/AuthSlice';
+import {setIdToken, setName, setUid} from '../redux/slices/AuthSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUpScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const email = useSelector(state => state.auth.email);
   const password = useSelector(state => state.auth.password);
+  const name = useSelector(state => state.auth.name);
 
   const handleSignUp = async () => {
     if (!email || !password) {
@@ -17,17 +19,20 @@ const SignUpScreen = ({navigation}) => {
     }
 
     try {
-      await auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then(userCredential => {
-          // User registered successfully
-          const uid = userCredential.user.uid;
-          dispatch(setUid(uid));
-          console.log('User UID: ', uid);
-        })
-        .catch(error => {
-          console.error(error);
-        });
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        email,
+        password,
+      );
+
+      const uid = userCredential.user.uid;
+      const idToken = await userCredential.user.getIdToken();
+      console.log('idtoken : ' + idToken);
+      dispatch(setUid(uid));
+      dispatch(setIdToken(idToken));
+      dispatch(setName(name));
+      await AsyncStorage.setItem('token', idToken);
+      console.log('User UID: ', uid);
+
       console.log('created a user with Email: ' + email);
       navigation.navigate('OTP');
       // Optionally navigate to another screen after successful login

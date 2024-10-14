@@ -8,7 +8,9 @@ const initialState = {
   name: '',
   isloggedIn: false,
   photo: '',
+  status: 'offline',
 };
+
 const AuthSlice = createSlice({
   name: 'AuthSlice',
   initialState: {
@@ -20,6 +22,7 @@ const AuthSlice = createSlice({
     name: '',
     isloggedIn: false,
     photo: '',
+    status: 'offline',
   },
   reducers: {
     setEmail: (state, action) => {
