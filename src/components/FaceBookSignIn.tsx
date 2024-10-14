@@ -30,7 +30,6 @@ const FaceBookSignIn = ({navigation}) => {
 
       // Sign-in the user with the credential
       return auth().signInWithCredential(facebookCredential);
-      
     } catch (error) {
       console.error(error);
     }

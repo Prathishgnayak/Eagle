@@ -9,7 +9,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {enableScreens} from 'react-native-screens';
 import {Image} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
-import ReactNativeBiometrics, {BiometryTypes} from 'react-native-biometrics';
+import BiometricAuth from './components/BiometricAuth';
 
 import store from './redux/store';
 import SignInScreen from './screens/SignInScreen';
@@ -22,9 +22,7 @@ import HomeIcon from './assets/images/home.png';
 import PlusIcon from './assets/images/plus.png';
 import ProfileIcon from './assets/images/profile.png';
 import ForgotPassword from './screens/ForgotPassword';
-
 import AuthScreen from './screens/AuthScreen';
-import BiometricAuth from './components/BiometricAuth';
 
 enableScreens();
 
@@ -36,7 +34,7 @@ const App = () => {
     // Hide the splash screen after a short delay or when your app is ready
     const timer = setTimeout(() => {
       SplashScreen.hide();
-    }, 3000); // Adjust this delay as necessary
+    }, 50000); // Adjust this delay as necessary
     //BiometricAuth();
     return () => clearTimeout(timer); // Cleanup timer on unmount
   }, []);

@@ -56,7 +56,7 @@ const ChatScreen = ({navigation}) => {
         text: message,
         sentBy: {email, username: name},
         time: formatTime(),
-        timestamp: database.ServerValue.TaIMESTAMP, // Store Firebase timestamp
+        timestamp: database.ServerValue.TIMESTAMP, // Store Firebase timestamp
       };
 
       // Save the message to Firebase and clear input field
