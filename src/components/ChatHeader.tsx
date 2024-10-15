@@ -1,8 +1,12 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import Back from './Back';
+import {useSelector} from 'react-redux';
+import UserStatus from './UserStatus';
 
-const ChatHeader = ({navigation, avatar, name}) => {
+const ChatHeader = ({navigation, avatar, name, uid}) => {
+  //const status = useSelector(state => state.auth.email);
+  console.log('Uid from chat header : ' + uid);
   return (
     <View style={styles.View}>
       <View style={styles.CardView}>
@@ -13,7 +17,8 @@ const ChatHeader = ({navigation, avatar, name}) => {
         />
         <View>
           <Text style={styles.HeaderText}>{name}</Text>
-          <Text style={styles.SubHeaderText}>Online</Text>
+          {/* <Text style={styles.SubHeaderText}>{status}</Text> */}
+          <UserStatus uid={uid} />
         </View>
       </View>
     </View>

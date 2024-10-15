@@ -6,6 +6,8 @@ buildscript {
         targetSdkVersion = 34
         ndkVersion = "26.1.10909125"
         kotlinVersion = "1.9.24"
+        googlePlayServicesVersion = "17.0.0" // Ensure this is the correct version
+        firebaseMessagingVersion = "24.0.1" // Use the latest stable version
     }
     repositories {
         google()

@@ -9,9 +9,11 @@ import {
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import {useSelector} from 'react-redux';
+import UserPresence from '../components/UserPresence';
 
 const AddScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
+  const currentUserId = useSelector(state => state.auth.uid);
   const [users, setUsers] = useState([]); // List of all users fetched from Firebase
   const [group, setGroup] = useState([]); // Random group of users
   const [groupCreated, setGroupCreated] = useState(false); // Toggle create group button and chat button
@@ -21,6 +23,7 @@ const AddScreen = ({navigation}) => {
     try {
       const snapshot = await database().ref('/users').once('value');
       const usersData = snapshot.val();
+      console.log('User data from the add screen ' + usersData);
 
       // Map the data to extract user id, name, email, and photo
       const userList = Object.keys(usersData).map(userId => {
@@ -32,6 +35,7 @@ const AddScreen = ({navigation}) => {
           avatar: user.photo || 'https://i.sstatic.net/l60Hf.png',
         };
       });
+      console.log('User List from the User data ' + userList);
 
       setUsers(userList);
     } catch (error) {
@@ -63,28 +67,36 @@ const AddScreen = ({navigation}) => {
     setGroupCreated(true);
   };
 
-  const handleOpenSingleChat = (user2email, avatar, name) => {
+  const handleOpenSingleChat = (user2email, avatar, name, id) => {
     const chatId = createChatId(email, user2email);
-
-    console.log(email, chatId);
-
-    // Navigate to ChatScreen with the correct name and parameters
-    navigation.navigate('Chat', {chatId: chatId, avatar: avatar, name2: name});
+    console.log(chatId, avatar, name, id);
+    navigation.navigate('Chat', {
+      chatId: chatId,
+      avatar: avatar,
+      name2: name,
+      userId: id,
+    });
   };
 
   const createChatId = (user1Email, user2Email) => {
-    console.log('Useremail' + user1Email);
     // Sort emails alphabetically and replace disallowed characters
     const sanitizedEmail1 = user1Email.replace(/\./g, ','); // Replaces '.' with ','
     const sanitizedEmail2 = user2Email.replace(/\./g, ',');
-    console.log('sanitizedEmails  :  ' + sanitizedEmail1, sanitizedEmail2);
+
     // Sort the emails alphabetically to ensure consistent chatId
     const sortedEmails = [sanitizedEmail1, sanitizedEmail2].sort();
-    console.log('Sorted Emails  ' + sortedEmails);
+
     // Join the sorted and sanitized emails to create the chatId
     const chatId = `${sortedEmails[0]}_${sortedEmails[1]}`;
 
     return chatId;
+  };
+
+  const handleOpenGroupChat = (group, email) => {
+    let chatId = createGroupChatId(group, email);
+    navigation.navigate('Chat', {chatId: chatId});
+    setGroup([]); // Clear group after navigating to chat
+    setGroupCreated(false); // Reset group creation flag
   };
 
   const createGroupChatId = (groupMembers, currentUserEmail) => {
@@ -109,13 +121,14 @@ const AddScreen = ({navigation}) => {
   return (
     <View style={styles.View}>
       {/* FlatList for displaying users */}
+      <UserPresence currentUserId={currentUserId} />
       <FlatList
         data={groupCreated ? group : users} // Show either the full user list or just the group
         keyExtractor={item => item.id.toString()}
         renderItem={({item}) => (
           <TouchableOpacity
             onPress={() =>
-              handleOpenSingleChat(item.email, item.avatar, item.name)
+              handleOpenSingleChat(item.email, item.avatar, item.name, item.id)
             }>
             <View style={styles.userCard}>
               <Image source={{uri: item.avatar}} style={styles.avatar} />
@@ -142,11 +155,7 @@ const AddScreen = ({navigation}) => {
         <TouchableOpacity
           style={styles.chatButton}
           onPress={() => {
-          
-            let groupName = '6';
-            navigation.navigate('Chat', {chatId: groupName});
-            setGroup([]); // Clear group after navigating to chat
-            setGroupCreated(false); // Reset group creation flag
+            handleOpenGroupChat(group, email);
           }}>
           <Text style={styles.buttonText}>Start Chat</Text>
         </TouchableOpacity>

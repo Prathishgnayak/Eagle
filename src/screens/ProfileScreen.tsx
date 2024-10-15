@@ -6,6 +6,7 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {resetState} from '../redux/slices/AuthSlice';
 import {LoginManager} from 'react-native-fbsdk-next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import InternetStatusComponent from '../components/InternetStatusComponent';
 
 const ProfileScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
@@ -65,6 +66,7 @@ const ProfileScreen = ({navigation}) => {
             style={styles.ProfileImage}
           />
         )}
+        <InternetStatusComponent/>
         <Text style={styles.Text}>Email : {email}</Text>
 
         {/* <View style={styles.passwordView}>

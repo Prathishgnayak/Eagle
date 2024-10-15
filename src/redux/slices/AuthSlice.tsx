@@ -9,6 +9,7 @@ const initialState = {
   isloggedIn: false,
   photo: '',
   status: 'offline',
+  internet: false,
 };
 
 const AuthSlice = createSlice({
@@ -23,6 +24,7 @@ const AuthSlice = createSlice({
     isloggedIn: false,
     photo: '',
     status: 'offline',
+    internet: false,
   },
   reducers: {
     setEmail: (state, action) => {
@@ -49,6 +51,9 @@ const AuthSlice = createSlice({
     setPhoto: (state, action) => {
       state.photo = action.payload;
     },
+    setInternet: (state, action) => {
+      state.internet = action.payload;
+    },
     resetState: () => initialState,
   },
 });
@@ -62,6 +67,7 @@ export const {
   setName,
   setIsLoggedIn,
   setPhoto,
+  setInternet,
   resetState,
 } = AuthSlice.actions;
 export default AuthSlice.reducer;

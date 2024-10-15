@@ -41,6 +41,7 @@ const OtpScreen = ({navigation}) => {
         phoneNumber: user.phoneNumber,
         photo: user.photo,
         idToken: user.idToken, // It's fine to store the ID token temporarily
+        uid: user.uid,
         name: user.name,
         status: user.status,
       })

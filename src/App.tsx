@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/no-unstable-nested-components */
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {Provider} from 'react-redux';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
@@ -23,18 +23,22 @@ import ProfileIcon from './assets/images/profile.png';
 import ForgotPassword from './screens/ForgotPassword';
 import AuthScreen from './screens/AuthScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {setupNotifications} from './components/Notification';
 
 enableScreens();
 
 const App = () => {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
+  //const currentUserId = useSelector(state => state.auth.uid);
 
   useEffect(() => {
     // Hide the splash screen after a short delay or when your app is ready
     const timer = setTimeout(() => {
       SplashScreen.hide();
     }, 50000); // Adjust this delay as necessary
+    setupNotifications();
+
     //BiometricAuth();
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
