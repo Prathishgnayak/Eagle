@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import android.util.Log
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -15,6 +16,7 @@ import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
+import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage // REMOVE THIS IMPORT
 
 class MainApplication : Application(), ReactApplication {
 
@@ -22,8 +24,8 @@ class MainApplication : Application(), ReactApplication {
         object : DefaultReactNativeHost(this) {
             override fun getPackages(): List<ReactPackage> =
                 PackageList(this).packages.apply {
-                    // Packages that cannot be autolinked yet can be added manually here, for example:
-                    // add(MyReactNativePackage())
+                    // REMOVE the following line or comment it out
+                    // add(ReactNativePushNotificationPackage())
                 }
 
             override fun getJSMainModuleName(): String = "index"
@@ -47,7 +49,7 @@ class MainApplication : Application(), ReactApplication {
         }
 
         // Create the default notification channel for Android 8.0 and above
-        createNotificationChannel()
+         createNotificationChannel()
 
         // Initialize Firebase messaging
         initFirebaseMessaging()
@@ -58,13 +60,14 @@ class MainApplication : Application(), ReactApplication {
             val channel = NotificationChannel(
                 "default",
                 "Default Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "This is the default notification channel"
             }
 
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager?.createNotificationChannel(channel)
+            Log.d("NotificationChannel", "Notification Channel created: ${channel.id}")
         }
     }
 

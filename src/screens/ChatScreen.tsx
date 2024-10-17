@@ -35,7 +35,6 @@ const ChatScreen = ({route, navigation}) => {
     const galleryStatus = await check(
       'android.permission.READ_EXTERNAL_STORAGE',
     );
-    console.log(cameraStatus, galleryStatus);
   };
 
   // Load messages from Firebase when component mounts
@@ -146,6 +145,7 @@ const ChatScreen = ({route, navigation}) => {
         username: name,
         time: formatTime(),
         timestamp: database.ServerValue.TIMESTAMP,
+        isSeen: false,
       };
 
       database()

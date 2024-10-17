@@ -6,7 +6,7 @@ import UserStatus from './UserStatus';
 
 const ChatHeader = ({navigation, avatar, name, uid}) => {
   //const status = useSelector(state => state.auth.email);
-  console.log('Uid from chat header : ' + uid);
+
   return (
     <View style={styles.View}>
       <View style={styles.CardView}>

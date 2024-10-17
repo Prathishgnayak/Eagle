@@ -42,8 +42,7 @@ const SignInwithFacebook = ({navigation}) => {
       );
       const idToken = await facebookCredential.token;
       dispatch(setIdToken(idToken));
-      console.log(facebookCredential);
-      console.log('token frfrfr  ' + idToken);
+
       await AsyncStorage.setItem('token', idToken);
 
       // Sign-in the user with the credential
@@ -55,12 +54,9 @@ const SignInwithFacebook = ({navigation}) => {
       const name = profile?.name;
       dispatch(setName(name));
 
-      console.log('UserCredential:', userCredential);
-      console.log(userCredential.user.email);
       dispatch(setEmail(userCredential.user.email));
       dispatch(setPhoto(userCredential.user.photoURL));
       dispatch(setUid(userCredential.user.uid));
-      console.log('Profile:', profile);
 
       navigation.navigate('OTP');
     } catch (error) {

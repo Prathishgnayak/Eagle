@@ -11,7 +11,7 @@ const InternetStatusComponent = () => {
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       dispatch(setInternet(state.isConnected));
-      console.log(state.isConnected); // Update Redux store with current connection status
+    
     });
 
     // Cleanup the listener on component unmount

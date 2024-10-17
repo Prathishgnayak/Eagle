@@ -13,6 +13,7 @@ import UserPresence from '../components/UserPresence';
 
 const AddScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
+
   const currentUserId = useSelector(state => state.auth.uid);
   const [users, setUsers] = useState([]); // List of all users fetched from Firebase
   const [group, setGroup] = useState([]); // Random group of users
@@ -21,23 +22,42 @@ const AddScreen = ({navigation}) => {
   // Function to fetch user list from Firebase
   const fetchUsers = async () => {
     try {
-      const snapshot = await database().ref('/users').once('value');
-      const usersData = snapshot.val();
-      console.log('User data from the add screen ' + usersData);
+      // const snapshot = await database().ref('/users').once('value');
+      // const usersData = snapshot.val();
 
-      // Map the data to extract user id, name, email, and photo
-      const userList = Object.keys(usersData).map(userId => {
-        const user = usersData[userId];
-        return {
-          id: userId,
-          name: user.name || 'Anonymous',
-          email: user.email || 'No email',
-          avatar: user.photo || 'https://i.sstatic.net/l60Hf.png',
-        };
+      const databaseRef = await database().ref('/users');
+      databaseRef.on('value', snapshot => {
+        const usersData = snapshot.val();
+        // Update your React Native component with the new data
+
+        // Map the data to extract user id, name, email, and photo
+        const userList = Object.keys(usersData).map(userId => {
+          const user = usersData[userId];
+          return {
+            id: userId,
+            name: user.name || 'Anonymous',
+            email: user.email || 'No email',
+            avatar: user.photo || 'https://i.sstatic.net/l60Hf.png',
+          };
+        });
+
+        setUsers(userList);
       });
-      console.log('User List from the User data ' + userList);
 
-      setUsers(userList);
+      //  const snapshot = await database().ref('/users').once('value');
+      //    const usersData = snapshot.val();
+      //   // Map the data to extract user id, name, email, and photo
+      //   const userList = Object.keys(usersData).map(userId => {
+      //     const user = usersData[userId];
+      //     return {
+      //       id: userId,
+      //       name: user.name || 'Anonymous',
+      //       email: user.email || 'No email',
+      //       avatar: user.photo || 'https://i.sstatic.net/l60Hf.png',
+      //     };
+      //   });
+      //   setUsers(userList);
+      //
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -69,7 +89,7 @@ const AddScreen = ({navigation}) => {
 
   const handleOpenSingleChat = (user2email, avatar, name, id) => {
     const chatId = createChatId(email, user2email);
-    console.log(chatId, avatar, name, id);
+
     navigation.navigate('Chat', {
       chatId: chatId,
       avatar: avatar,

@@ -27,12 +27,11 @@ const GoogleSign = ({navigation}) => {
 
       // Get the user's ID token
       const userInfo = await GoogleSignin.signIn();
-      console.log('User Info:', userInfo);
+
       const name = userInfo.data?.user.name;
       dispatch(setName(name));
       const idToken = userInfo.idToken || userInfo.data.idToken;
 
-      console.log(idToken);
       dispatch(setIdToken(idToken));
       await AsyncStorage.setItem('token', idToken);
       dispatch(setPhoto(userInfo.data?.user.photo));

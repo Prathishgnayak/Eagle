@@ -10,6 +10,7 @@ import auth from '@react-native-firebase/auth';
 import UserInfo from '../components/UserInfo'; // Ensure this is a function that doesn't have hooks directly
 import {useSelector} from 'react-redux';
 import database from '@react-native-firebase/database';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OTP_LENGTH = 6;
 
@@ -30,17 +31,28 @@ const OtpScreen = ({navigation}) => {
     name: useSelector(state => state.auth.name),
     status: useSelector(state => state.auth.status),
   };
+
+  const storeUserDataInAsync = async user => {
+    await AsyncStorage.setItem('email', user.email);
+    await AsyncStorage.setItem('phoneNumber', user.phoneNumber);
+    await AsyncStorage.setItem('photo', user.photo);
+    await AsyncStorage.setItem('uid', user.uid);
+    await AsyncStorage.setItem('name', user.name);
+    await AsyncStorage.setItem('status', user.status);
+  };
   useEffect(() => {
     let interval = null;
 
     // Storing user data in Firebase under their unique UID
+
+    storeUserDataInAsync(user);
     database()
       .ref(`/users/${user.uid}`)
       .set({
         email: user.email,
         phoneNumber: user.phoneNumber,
         photo: user.photo,
-        idToken: user.idToken, // It's fine to store the ID token temporarily
+        idToken: user.idToken,
         uid: user.uid,
         name: user.name,
         status: user.status,
