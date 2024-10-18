@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -8,27 +8,25 @@ import {
   Image,
 } from 'react-native';
 import database from '@react-native-firebase/database';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import UserPresence from '../components/UserPresence';
+import ViewProfileImageModal from '../components/ViewProfileImageModal';
 
-const AddScreen = ({navigation}) => {
+const AddScreen = ({ navigation }) => {
   const email = useSelector(state => state.auth.email);
-
   const currentUserId = useSelector(state => state.auth.uid);
   const [users, setUsers] = useState([]); // List of all users fetched from Firebase
   const [group, setGroup] = useState([]); // Random group of users
   const [groupCreated, setGroupCreated] = useState(false); // Toggle create group button and chat button
+  const [isModalVisible, setModalVisible] = useState(false); // Control modal visibility
+  const [selectedImage, setSelectedImage] = useState(null); // Store the selected image URL for the modal
 
   // Function to fetch user list from Firebase
   const fetchUsers = async () => {
     try {
-      // const snapshot = await database().ref('/users').once('value');
-      // const usersData = snapshot.val();
-
       const databaseRef = await database().ref('/users');
       databaseRef.on('value', snapshot => {
         const usersData = snapshot.val();
-        // Update your React Native component with the new data
 
         // Map the data to extract user id, name, email, and photo
         const userList = Object.keys(usersData).map(userId => {
@@ -43,21 +41,6 @@ const AddScreen = ({navigation}) => {
 
         setUsers(userList);
       });
-
-      //  const snapshot = await database().ref('/users').once('value');
-      //    const usersData = snapshot.val();
-      //   // Map the data to extract user id, name, email, and photo
-      //   const userList = Object.keys(usersData).map(userId => {
-      //     const user = usersData[userId];
-      //     return {
-      //       id: userId,
-      //       name: user.name || 'Anonymous',
-      //       email: user.email || 'No email',
-      //       avatar: user.photo || 'https://i.sstatic.net/l60Hf.png',
-      //     };
-      //   });
-      //   setUsers(userList);
-      //
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -67,29 +50,16 @@ const AddScreen = ({navigation}) => {
     fetchUsers();
   }, []);
 
-  // Function to create a random group of 4 users
-  // const createRandomGroup = () => {
-  //   const shuffledUsers = users.sort(() => 0.5 - Math.random());
-  //   const randomGroup = shuffledUsers.slice(0, 3); // Select random 4 users
-  //   setGroup(randomGroup);
-  //   setGroupCreated(true);
-  // };
-
   const createRandomGroup = () => {
-    // Filter out the current user's email from the user list
     const filteredUsers = users.filter(user => user.email !== email);
-
-    // Shuffle the filtered user list and select 3 random users
     const shuffledUsers = filteredUsers.sort(() => 0.5 - Math.random());
-    const randomGroup = shuffledUsers.slice(0, 3); // Select 3 users
-
+    const randomGroup = shuffledUsers.slice(0, 3);
     setGroup(randomGroup);
     setGroupCreated(true);
   };
 
   const handleOpenSingleChat = (user2email, avatar, name, id) => {
     const chatId = createChatId(email, user2email);
-
     navigation.navigate('Chat', {
       chatId: chatId,
       avatar: avatar,
@@ -99,59 +69,51 @@ const AddScreen = ({navigation}) => {
   };
 
   const createChatId = (user1Email, user2Email) => {
-    // Sort emails alphabetically and replace disallowed characters
-    const sanitizedEmail1 = user1Email.replace(/\./g, ','); // Replaces '.' with ','
+    const sanitizedEmail1 = user1Email.replace(/\./g, ',');
     const sanitizedEmail2 = user2Email.replace(/\./g, ',');
-
-    // Sort the emails alphabetically to ensure consistent chatId
     const sortedEmails = [sanitizedEmail1, sanitizedEmail2].sort();
-
-    // Join the sorted and sanitized emails to create the chatId
-    const chatId = `${sortedEmails[0]}_${sortedEmails[1]}`;
-
-    return chatId;
+    return `${sortedEmails[0]}_${sortedEmails[1]}`;
   };
 
   const handleOpenGroupChat = (group, email) => {
     let chatId = createGroupChatId(group, email);
-    navigation.navigate('Chat', {chatId: chatId});
-    setGroup([]); // Clear group after navigating to chat
-    setGroupCreated(false); // Reset group creation flag
+    navigation.navigate('Chat', { chatId: chatId });
+    setGroup([]);
+    setGroupCreated(false);
   };
 
   const createGroupChatId = (groupMembers, currentUserEmail) => {
-    // Add current user's email to the list of group members
     const emails = [
       ...groupMembers.map(member => member.email),
       currentUserEmail,
     ];
-
-    // Sanitize each email by replacing disallowed characters
     const sanitizedEmails = emails.map(email => email.replace(/\./g, ','));
-
-    // Sort the emails alphabetically to ensure a consistent chatId
     const sortedEmails = sanitizedEmails.sort();
+    return sortedEmails.join('_');
+  };
 
-    // Join the sorted emails with an underscore to create the group chatId
-    const groupChatId = sortedEmails.join('_');
-
-    return groupChatId;
+  // Toggle modal visibility and set the selected image
+  const toggleModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setModalVisible(!isModalVisible);
   };
 
   return (
     <View style={styles.View}>
-      {/* FlatList for displaying users */}
       <UserPresence currentUserId={currentUserId} />
       <FlatList
-        data={groupCreated ? group : users} // Show either the full user list or just the group
+        data={groupCreated ? group : users}
         keyExtractor={item => item.id.toString()}
-        renderItem={({item}) => (
+        renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() =>
               handleOpenSingleChat(item.email, item.avatar, item.name, item.id)
             }>
             <View style={styles.userCard}>
-              <Image source={{uri: item.avatar}} style={styles.avatar} />
+              <TouchableOpacity
+                onPress={() => toggleModal(item.avatar)}>
+                <Image source={{ uri: item.avatar }} style={styles.avatar} />
+              </TouchableOpacity>
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>{item.name}</Text>
                 <Text style={styles.userEmail}>{item.email}</Text>
@@ -161,7 +123,6 @@ const AddScreen = ({navigation}) => {
         )}
       />
 
-      {/* Create group button (only visible before a group is created) */}
       {!groupCreated && (
         <TouchableOpacity
           style={styles.createButton}
@@ -170,16 +131,16 @@ const AddScreen = ({navigation}) => {
         </TouchableOpacity>
       )}
 
-      {/* Start chat button (only visible after group is created) */}
       {groupCreated && (
         <TouchableOpacity
           style={styles.chatButton}
-          onPress={() => {
-            handleOpenGroupChat(group, email);
-          }}>
+          onPress={() => handleOpenGroupChat(group, email)}>
           <Text style={styles.buttonText}>Start Chat</Text>
         </TouchableOpacity>
       )}
+
+
+      <ViewProfileImageModal selectedImage={selectedImage} isVisible={isModalVisible} onClose={()=>toggleModal(null)}/>
     </View>
   );
 };

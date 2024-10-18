@@ -11,6 +11,7 @@ import UserInfo from '../components/UserInfo'; // Ensure this is a function that
 import {useSelector} from 'react-redux';
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Loader from '../components/Loader';
 
 const OTP_LENGTH = 6;
 
@@ -21,6 +22,7 @@ const OtpScreen = ({navigation}) => {
   const [timer, setTimer] = useState(59);
   const [confirm, setConfirm] = useState(null);
   const otpInputs = useRef([]);
+  const [loading, setLoading] = useState(false);
 
   const user = {
     email: useSelector(state => state.auth.email),
@@ -98,6 +100,7 @@ const OtpScreen = ({navigation}) => {
   // Send OTP via Firebase
   const handleSendOtp = async () => {
     try {
+      setLoading(true);
       const phoneNumberWithCountryCode = `+91${mobileNumber}`; // Format number
       const confirmation = await auth().signInWithPhoneNumber(
         phoneNumberWithCountryCode,
@@ -105,6 +108,7 @@ const OtpScreen = ({navigation}) => {
 
       setConfirm(confirmation);
       setIsOtpSent(true);
+      setLoading(false);
       setTimer(59);
 
       console.log('OTP sent successfully:', confirmation);
@@ -115,6 +119,7 @@ const OtpScreen = ({navigation}) => {
 
   // Verify OTP
   const handleVerifyOtp = async () => {
+    setLoading(true);
     const enteredOtp = otpArray.join('');
     if (confirm && enteredOtp.length === OTP_LENGTH) {
       try {
@@ -124,6 +129,8 @@ const OtpScreen = ({navigation}) => {
       } catch (error) {
         console.error('Invalid OTP:', error);
         alert('The OTP you entered is incorrect. Please try again.');
+      } finally {
+        setLoading(false);
       }
     } else {
       alert('Please enter the full OTP or request a new one.');
@@ -191,6 +198,7 @@ const OtpScreen = ({navigation}) => {
             </TouchableOpacity>
           </>
         )}
+        {loading && <Loader />}
       </View>
     </View>
   );

@@ -11,8 +11,10 @@ const SignUpScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
   const password = useSelector(state => state.auth.password);
   const name = useSelector(state => state.auth.name);
+  const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
+    setLoading(true);
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
@@ -35,6 +37,7 @@ const SignUpScreen = ({navigation}) => {
 
       console.log('created a user with Email: ' + email);
       navigation.navigate('OTP');
+      setLoading(false);
       // Optionally navigate to another screen after successful login
     } catch (error) {
       console.error(error);
@@ -50,6 +53,7 @@ const SignUpScreen = ({navigation}) => {
         navigation={navigation}
         navPath="SignIn"
         onPress={handleSignUp}
+        loading={loading}
       />
     </View>
   );

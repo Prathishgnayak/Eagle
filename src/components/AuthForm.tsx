@@ -13,12 +13,24 @@ import GoogleSign from './GoogleSign';
 //import FaceBookSignIn from './FaceBookSignIn';
 import AppleSignIn from './AppleSignIn';
 import SignInwithFacebook from './SignInwithFacebook';
+import Loader from './Loader';
 
-const AuthForm = ({title, bottomText, navigation, navPath, onPress}) => {
+const AuthForm = ({
+  title,
+  bottomText,
+  navigation,
+  navPath,
+  onPress,
+  loading,
+}) => {
   const dispatch = useDispatch();
   const email = useSelector(state => state.auth.email);
   const password = useSelector(state => state.auth.password);
   const name = useSelector(state => state.auth.name);
+
+  if (loading) {
+    return <Loader />;
+  }
   return (
     <View>
       <View style={styles.CardView}>

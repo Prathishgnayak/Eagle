@@ -10,6 +10,7 @@ import InternetStatusComponent from '../components/InternetStatusComponent';
 import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 import database from '@react-native-firebase/database';
+import ViewProfileImageModal from '../components/ViewProfileImageModal';
 
 const ProfileScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
@@ -20,6 +21,8 @@ const ProfileScreen = ({navigation}) => {
   const uid = useSelector(state => state.auth.uid);
   const name = useSelector(state => state.auth.name);
   const status = useSelector(state => state.auth.status);
+
+  const [isModalVisible, setModalVisible] = useState(false); // Control modal visibility
 
   // console.log(
   //   'Email : ' +
@@ -124,7 +127,9 @@ const ProfileScreen = ({navigation}) => {
       <View style={styles.CardView}>
         {UserPhoto ? (
           <>
+          <TouchableOpacity onPress={()=>setModalVisible(true)}>
             <Image source={{uri: UserPhoto}} style={styles.ProfileImage} />
+            </TouchableOpacity>
             <TouchableOpacity onPress={addPhoto} style={styles.addPhoto}>
               <Text style={styles.addPhotoText}>Change Photo</Text>
             </TouchableOpacity>
@@ -180,6 +185,8 @@ const ProfileScreen = ({navigation}) => {
         }}>
         <Text style={styles.SignOutButtonText}>Sign Out</Text>
       </TouchableOpacity>
+
+      <ViewProfileImageModal selectedImage={UserPhoto} isVisible={isModalVisible} onClose={()=>setModalVisible(false)}/>
     </View>
   );
 };

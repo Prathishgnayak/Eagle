@@ -8,20 +8,21 @@ import {name as appName} from './app.json';
 import messaging from '@react-native-firebase/messaging';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
+import {Platform} from 'react-native';
 
+// Configure PushNotification library
 PushNotification.configure({
   // (optional) Called when Token is generated (iOS and Android)
   onRegister: function (token) {
-    console.log('TOKEN:', token);
+    console.log('FCM Token:', token); // Log the token
   },
 
   // (required) Called when a remote is received or opened, or local notification is opened
   onNotification: function (notification) {
     console.log('NOTIFICATION:', notification);
 
-    // process the notification
-
-    // (required) Called when a remote is received or opened, or local notification is opened
+    // Process the notification
+    // You can also use this to navigate or show an alert
     notification.finish(PushNotificationIOS.FetchResult.NoData);
   },
 
@@ -29,16 +30,15 @@ PushNotification.configure({
   onAction: function (notification) {
     console.log('ACTION:', notification.action);
     console.log('NOTIFICATION:', notification);
-
-    // process the action
+    // Process the action (e.g. navigate based on notification data)
   },
 
-  // (optional) Called when the user fails to register for remote notifications. Typically occurs when APNS is having issues, or the device is a simulator. (iOS)
+  // (optional) Called when the user fails to register for remote notifications
   onRegistrationError: function (err) {
-    console.error(err.message, err);
+    console.error('Push Notification Registration Error:', err.message, err);
   },
 
-  // IOS ONLY (optional): default: all - Permissions to register.
+  // IOS ONLY (optional): permissions to register (default: all)
   permissions: {
     alert: true,
     badge: true,
@@ -46,19 +46,35 @@ PushNotification.configure({
   },
 
   // Should the initial notification be popped automatically
-  // default: true
   popInitialNotification: true,
 
-  /**
-   * (optional) default: true
-   * - Specified if permissions (ios) and token (android and ios) will requested or not,
-   * - if not, you must call PushNotificationsHandler.requestPermissions() later
-   * - if you are not using remote notification or do not have Firebase installed, use this:
-   *     requestPermissions: Platform.OS === 'ios'
-   */
-  requestPermissions: true,
+  // Request permissions (iOS) and token (Android and iOS)
+  requestPermissions: Platform.OS === 'ios', // Ensure requestPermissions is true for iOS
 });
+
+// Handle background notifications
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Message handled in the background!', remoteMessage);
+  // Here you can also navigate to specific screens based on the notification data
 });
+
+// Handle foreground notifications
+messaging().onMessage(async remoteMessage => {
+  console.log('A new FCM message arrived!', JSON.stringify(remoteMessage));
+
+  // For foreground notifications, display a local notification
+  PushNotification.localNotification({
+    channelId: 'default', // Ensure you have the right channel ID set
+    title: remoteMessage.notification.title,
+    message: remoteMessage.notification.body,
+  });
+
+  // Optionally, navigate based on the data from the notification
+  // For example:
+  // if (remoteMessage.data && remoteMessage.data.screen) {
+  //   navigation.navigate(remoteMessage.data.screen);
+  // }
+});
+
+// App component registration
 AppRegistry.registerComponent(appName, () => App);

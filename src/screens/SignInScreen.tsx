@@ -18,9 +18,11 @@ const SignInScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const email = useSelector(state => state.auth.email);
   const password = useSelector(state => state.auth.password);
+  const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
     // await triggerLocalNotification();
+    setLoading(true);
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
@@ -47,6 +49,7 @@ const SignInScreen = ({navigation}) => {
       // console.log('Logged In with Email: ' + email);
       //navigation.navigate('OTP');
       navigation.navigate('OTP');
+      setLoading(false);
 
       // Optionally navigate to another screen after successful login
     } catch (error) {
@@ -95,6 +98,7 @@ const SignInScreen = ({navigation}) => {
         navigation={navigation}
         navPath="SignUp"
         onPress={handleSignIn}
+        loading={loading}
       />
     </View>
   );

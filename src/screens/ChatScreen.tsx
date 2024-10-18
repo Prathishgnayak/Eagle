@@ -39,7 +39,7 @@ const ChatScreen = ({route, navigation}) => {
 
   // Load messages from Firebase when component mounts
   useEffect(() => {
-    status();
+    //status();
     const messagesRef = database().ref(`/chats/${chatId}/messages`);
 
     const onValueChange = snapshot => {
@@ -284,21 +284,21 @@ const styles = StyleSheet.create({
   camera_Image: {
     width: 40,
     height: 40,
-    tintColor: '#007AFF',
+    //tintColor: '#007AFF',
   },
   attachment_Image: {
-    width: 35,
-    height: 35,
-    tintColor: '#007AFF',
+    width:45,
+    height:45,
+    //tintColor: '#007AFF',
     marginLeft: 7,
     marginRight: 7,
     alignSelf: 'center',
   },
   send_message_Image: {
-    width: 35,
-    height: 35,
-    tintColor: '#007AFF',
-    margin: 10,
+    width: 50,
+    height: 50,
+    //tintColor: '#007AFF',
+    margin: 0,
   },
   sendButton: {
     justifyContent: 'center',
