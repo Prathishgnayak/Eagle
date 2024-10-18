@@ -1,23 +1,46 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import AuthForm from '../components/AuthForm';
 import auth from '@react-native-firebase/auth';
 import {useSelector} from 'react-redux';
+import Error from '../components/ErrorToast';
+import Toast from 'react-native-toast-message';
 
 const ForgotPassword = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
+
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState(false);
   const handleResetPassword = async () => {
-    await auth().sendPasswordResetEmail(email);
+    try {
+      setErrors(false);
+      setLoading(true);
+      await auth().sendPasswordResetEmail(email);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      setErrors(true);
+    }
   };
 
   return (
     <View style={styles.View}>
+      {errors && (
+        <>
+          <Error
+            title="Wrong Email"
+            text="Please Enter the Valid Email "
+          />
+          <Toast />
+        </>
+      )}
       <AuthForm
         title="Reset Password"
         bottomText="Go back "
         navigation={navigation}
         navPath="SignIn"
         onPress={handleResetPassword}
+        loading={loading}
       />
     </View>
   );

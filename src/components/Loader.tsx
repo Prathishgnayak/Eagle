@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+   // height:20
   },
   animation: {
     width: width * 0.4, // Default size for the loader, can be adjusted

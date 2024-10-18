@@ -12,17 +12,20 @@ import {
   setUid,
 } from '../redux/slices/AuthSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {triggerLocalNotification} from '../components/Notification';
+import Error from '../components/ErrorToast';
+import Toast from 'react-native-toast-message';
 
 const SignInScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const email = useSelector(state => state.auth.email);
   const password = useSelector(state => state.auth.password);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState(false);
 
   const handleSignIn = async () => {
     // await triggerLocalNotification();
     setLoading(true);
+    setErrors(false)
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
@@ -34,27 +37,21 @@ const SignInScreen = ({navigation}) => {
         password,
       );
 
-      // Get user ID and dispatch it
       const uid = userCredential.user.uid;
       dispatch(setUid(uid));
 
-      // Get the ID token
       const idToken = await userCredential.user.getIdToken();
 
-      // Use the ID token (e.g., dispatch or store it)
-      // console.log(idToken);
       dispatch(setIdToken(idToken));
       await AsyncStorage.setItem('token', idToken);
 
-      // console.log('Logged In with Email: ' + email);
-      //navigation.navigate('OTP');
       navigation.navigate('OTP');
       setLoading(false);
-
-      // Optionally navigate to another screen after successful login
     } catch (error) {
-      console.error(error);
-      Alert.alert('Login Error', error.message); // Show user-friendly error message
+      //console.error(error);
+      setLoading(false)
+      setErrors(true);
+      
     }
   };
   useEffect(() => {
@@ -68,12 +65,12 @@ const SignInScreen = ({navigation}) => {
         const uid = await AsyncStorage.getItem('uid');
         const name = await AsyncStorage.getItem('name');
         const status = await AsyncStorage.getItem('status');
-        console.log('Email : ' + uemail);
-        console.log('phoneNumber : ' + phoneNumber);
-        console.log('photo : ' + photo);
-        console.log('uid : ' + uid);
-        console.log('name : ' + name);
-        console.log('status : ' + status);
+        // console.log('Email : ' + uemail);
+        // console.log('phoneNumber : ' + phoneNumber);
+        // console.log('photo : ' + photo);
+        // console.log('uid : ' + uid);
+        // console.log('name : ' + name);
+        // console.log('status : ' + status);
         dispatch(setEmail(uemail));
         dispatch(setUid(uid));
         dispatch(setPhoto(photo));
@@ -92,6 +89,15 @@ const SignInScreen = ({navigation}) => {
   }, [navigation]);
   return (
     <View style={styles.View}>
+      {errors && (
+        <>
+        <Error
+          title="Wrong Email or Password"
+          text="Please Enter the Valid Email or Password"
+        />
+        <Toast />
+        </>
+      )}
       <AuthForm
         title="Sign In"
         bottomText="Don't Have an Account.? "

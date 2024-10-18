@@ -11,6 +11,9 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 import database from '@react-native-firebase/database';
 import ViewProfileImageModal from '../components/ViewProfileImageModal';
+import Toast from 'react-native-toast-message';
+import Error from '../components/ErrorToast';
+import Loader from '../components/Loader';
 
 const ProfileScreen = ({navigation}) => {
   const email = useSelector(state => state.auth.email);
@@ -45,15 +48,20 @@ const ProfileScreen = ({navigation}) => {
   const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState(false);
 
   const handleSignOut = async () => {
     try {
+      setLoading(true);
+      setErrors(false);
       await auth().signOut();
       await GoogleSignin.signOut();
       await LoginManager.logOut();
       await dispatch(resetState());
       console.log('logged out successfully');
       navigation.navigate('SignIn');
+      setLoading(false);
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('email');
       await AsyncStorage.removeItem('phoneNumber');
@@ -62,7 +70,8 @@ const ProfileScreen = ({navigation}) => {
       await AsyncStorage.removeItem('name');
       await AsyncStorage.removeItem('status');
     } catch (error) {
-      console.error(error);
+      setLoading(false);
+      setErrors(true);
     }
   };
 
@@ -75,8 +84,10 @@ const ProfileScreen = ({navigation}) => {
         if (response.didCancel) {
           console.log('User cancelled image picker');
         } else if (response.errorCode) {
-          console.error('Gallery error:', response.errorMessage);
+          setErrors(true);
+          //console.error('Gallery error:', response.errorMessage);
         } else {
+          setLoading(true);
           const imageUri = response.assets[0].uri;
           sendImageMessage(imageUri);
         }
@@ -94,21 +105,21 @@ const ProfileScreen = ({navigation}) => {
       const downloadURL = await storageRef.getDownloadURL();
       return downloadURL;
     } catch (error) {
-      console.error('Error uploading image:', error);
+      setErrors(true);
       return null;
     }
   };
   const sendImageMessage = async imageUri => {
     const photo = await uploadImageToStorage(imageUri);
     if (photo) {
-      
       database()
         .ref(`/users/${uid}/`)
-        .update({photo:photo})
+        .update({photo: photo})
         .catch(error => {
-          console.error('Error sending image message:', error);
+          setErrors(true);
         });
       dispatch(setPhoto(imageUri));
+      setLoading(false);
       await AsyncStorage.setItem('photo', imageUri);
     }
   };
@@ -127,8 +138,8 @@ const ProfileScreen = ({navigation}) => {
       <View style={styles.CardView}>
         {UserPhoto ? (
           <>
-          <TouchableOpacity onPress={()=>setModalVisible(true)}>
-            <Image source={{uri: UserPhoto}} style={styles.ProfileImage} />
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <Image source={{uri: UserPhoto}} style={styles.ProfileImage} />
             </TouchableOpacity>
             <TouchableOpacity onPress={addPhoto} style={styles.addPhoto}>
               <Text style={styles.addPhotoText}>Change Photo</Text>
@@ -178,6 +189,7 @@ const ProfileScreen = ({navigation}) => {
           )}
         </View> */}
       </View>
+      {loading && <Loader />}
       <TouchableOpacity
         style={styles.SignOutButton}
         onPress={() => {
@@ -186,7 +198,22 @@ const ProfileScreen = ({navigation}) => {
         <Text style={styles.SignOutButtonText}>Sign Out</Text>
       </TouchableOpacity>
 
-      <ViewProfileImageModal selectedImage={UserPhoto} isVisible={isModalVisible} onClose={()=>setModalVisible(false)}/>
+      <ViewProfileImageModal
+        selectedImage={UserPhoto}
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+      />
+      {errors && (
+        <>
+          <Error
+            title="Something Went Wrong"
+            text="Please clear App data and Try Again"
+          />
+          <Toast />
+        </>
+      )}
+
+      
     </View>
   );
 };

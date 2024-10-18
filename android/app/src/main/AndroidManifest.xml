@@ -86,7 +86,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="yourapp" android:host="home" />
+                <data android:scheme="eagle" android:host="home" />
             </intent-filter>
 
             <!-- Add Screen Deep Link -->
@@ -94,7 +94,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="yourapp" android:host="add" />
+                <data android:scheme="eagle" android:host="add" />
             </intent-filter>
 
             <!-- Profile Screen Deep Link -->
@@ -102,7 +102,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="yourapp" android:host="profile" />
+                <data android:scheme="eagle" android:host="profile" />
             </intent-filter>
 
             <!-- SignIn Screen Deep Link -->
@@ -110,7 +110,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="yourapp" android:host="sign-in" />
+                <data android:scheme="eagle" android:host="sign-in" />
             </intent-filter>
 
             <!-- SignUp Screen Deep Link -->
@@ -118,7 +118,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="yourapp" android:host="sign-up" />
+                <data android:scheme="eagle" android:host="sign-up" />
             </intent-filter>
 
             <!-- OTP Screen Deep Link -->
@@ -126,7 +126,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="yourapp" android:host="otp" />
+                <data android:scheme="eagle" android:host="otp" />
             </intent-filter>
 
             <!-- Forgot Password Screen Deep Link -->
@@ -134,7 +134,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="yourapp" android:host="forgot" />
+                <data android:scheme="eagle" android:host="forgot" />
             </intent-filter>
 
             <!-- Chat Screen Deep Link with Dynamic Parameter (id) -->
@@ -142,7 +142,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="yourapp" android:host="chat" android:pathPattern="/.*" />
+                <data android:scheme="eagle" android:host="chat" android:pathPattern="/.*" />
             </intent-filter>
 
             <intent-filter>

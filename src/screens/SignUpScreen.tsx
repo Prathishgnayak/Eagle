@@ -5,6 +5,8 @@ import AuthForm from '../components/AuthForm';
 import {useDispatch, useSelector} from 'react-redux';
 import {setIdToken, setName, setUid} from '../redux/slices/AuthSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
+import Error from '../components/ErrorToast';
 
 const SignUpScreen = ({navigation}) => {
   const dispatch = useDispatch();
@@ -12,11 +14,17 @@ const SignUpScreen = ({navigation}) => {
   const password = useSelector(state => state.auth.password);
   const name = useSelector(state => state.auth.name);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState(false);
 
   const handleSignUp = async () => {
+    setErrors(false);
     setLoading(true);
+    // if (!email ) {
+    //   setErrors(true)
+    //   return;
+    // }
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      setErrors(true);
       return;
     }
 
@@ -41,12 +49,22 @@ const SignUpScreen = ({navigation}) => {
       // Optionally navigate to another screen after successful login
     } catch (error) {
       console.error(error);
-      Alert.alert('Login Error', error.message); // Show user-friendly error message
+      setLoading(false);
+      setErrors(true);
     }
   };
 
   return (
     <View style={styles.View}>
+      {errors && (
+        <>
+          <Error
+            title="Error"
+            text="Please Enter the Valid Email or Password"
+          />
+          <Toast />
+        </>
+      )}
       <AuthForm
         title="Sign Up"
         bottomText="Already Have an Account.? "
